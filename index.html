@@ -22,6 +22,7 @@
     --f-tit:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;--f-txt:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   }
   *{box-sizing:border-box}
+  [hidden]{display:none!important}
   body{background:var(--bg);color:var(--texto);font-family:var(--f-txt);line-height:1.5;-webkit-font-smoothing:antialiased}
   h1,h2,h3,h4{font-family:var(--f-tit);font-weight:700;line-height:1.08;margin:0;text-wrap:balance;letter-spacing:.2px}
   button{font-family:inherit}
@@ -179,6 +180,8 @@
   .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:linear-gradient(135deg,var(--azul),var(--azul2));color:#fff;padding:14px 22px;border-radius:14px;font-size:15px;font-weight:700;z-index:60;box-shadow:0 10px 30px rgba(11,79,138,.4);opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;max-width:92vw;text-align:center;display:flex;gap:9px;align-items:center}
   .toast svg{width:20px;height:20px;flex:none}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(-6px)}
+  .toast.t-ok{background:linear-gradient(135deg,var(--verde),var(--verde-osc))}
+  .toast.t-err{background:linear-gradient(135deg,var(--rojo),#9b2d20);box-shadow:0 10px 30px rgba(192,57,43,.4)}
   .muted{color:var(--suave)}.mt{margin-top:14px}.mb{margin-bottom:14px}
   .addon{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--verde-osc);background:var(--verde-suave);padding:3px 9px;border-radius:999px}
   @media(max-width:520px){.login-card h1{font-size:34px}.wrap{padding:14px 14px 84px}.view-head h2{font-size:23px}}
@@ -239,6 +242,7 @@ var EMPRESA=JSON.parse(JSON.stringify(EMPRESA_DEMO));
 var ENTIDAD_ID=null, UID=null, usuarioNombre='', DEMO=false, SUPER=false;
 var hoyISO=new Date().toISOString().slice(0,10);
 function diasA(f){return Math.ceil((new Date(f+'T00:00:00')-new Date(hoyISO+'T00:00:00'))/86400000);}
+setInterval(function(){var d=new Date().toISOString().slice(0,10);if(d!==hoyISO){hoyISO=d;try{var ap=document.getElementById('app');if(ap&&!ap.hidden&&typeof repintar==='function')repintar();}catch(e){}}},60000);
 
 var contratos=[
  {id:'C-2026-014',obj:'Construcción de polideportivo Barrio Centro',contratista:'Constructora Horizonte S.A.S.',nitCont:'900.111.222',interventor:'Laura Pérez',cedInt:'22.333.444',intAprobo:true,ordenador:'Juan Gómez — Secretario de Infraestructura',cedOrd:'7.111.222',valor:1850000000,ejecutado:1295000000,fin:'2026-11-30',poliza:true,finPoliza:'2026-10-28',otrosi:2,anticipo:740000000,antAmort:120000000,cargadoPor:'Secretaría General',fecha:'2026-09-15',doc:'Contrato_C-2026-014.pdf'},
@@ -322,7 +326,7 @@ function N(){return window.NEON;}
 async function q(builder){var r=await builder;if(r&&typeof r==='object'&&('data' in r||'error' in r)){if(r.error)throw new Error((r.error&&(r.error.message||r.error.msg))||'Error de datos');return r.data;}return r;}
 async function rpc(fn,args){var r=await N().rpc(fn,args||{});if(r&&typeof r==='object'&&('data' in r||'error' in r)){if(r.error)throw new Error((r.error&&r.error.message)||'Error');return r.data;}return r;}
 function authErr(m){var el=document.getElementById('authErr');if(el)el.textContent=m||'';}
-function trad(e){var m=(e&&(e.message||e.msg))||String(e||'');if(/origin/i.test(m))return 'Dominio no autorizado todavía (configuración pendiente).';if(/(invalid|incorrect|wrong).*(credential|password|email)|credential|unauthorized|401/i.test(m))return 'Correo o contraseña incorrectos.';if(/exist|registered|already/i.test(m))return 'Ese correo ya está registrado. Inicie sesión.';if(/network|fetch|failed/i.test(m))return 'Problema de conexión. Intente de nuevo.';return m;}
+function trad(e){var m=(e&&(e.message||e.msg))||String(e||'');if(/origin/i.test(m))return 'Dominio no autorizado todavía (configuración pendiente).';if(/(invalid|incorrect|wrong).*(credential|password|email)|credential|unauthorized|401/i.test(m))return 'Correo o contraseña incorrectos.';if(/exist|registered|already/i.test(m))return 'Ese correo ya está registrado. Inicie sesión.';if(/short|too short|at least|mínim|weak|debil/i.test(m))return 'La contraseña es muy corta: use al menos 8 caracteres.';if(/too many|rate|many attempts|demasiad/i.test(m))return 'Demasiados intentos. Espere unos minutos e intente de nuevo.';if(/network|fetch|failed/i.test(m))return 'Problema de conexión. Intente de nuevo.';return m;}
 
 /* ===================== Pantallas de ingreso ===================== */
 function arranque(){
@@ -448,7 +452,7 @@ RENDER.tablero=function(){
  var peorG=h.length?h[0].sev:'ok';
  var sm={rojo:{c:'sem-rojo',t:'Riesgo crítico',p:'Hay hallazgos críticos que exigen verificación inmediata.'},naranja:{c:'sem-naranja',t:'Riesgo alto',p:'Hay alertas altas por confirmar antes del próximo pago.'},amarillo:{c:'sem-amarillo',t:'Riesgo medio',p:'Hay señales por vigilar.'},ok:{c:'sem-ok',t:'En orden',p:'No hay hallazgos abiertos.'}}[peorG];
  var score=Math.max(0,100-nR*16-nN*8-nA*3);
- var top=h.slice(0,4).map(function(x){return '<div class="alert-row"><div class="ic ic-'+SEV[x.sev].cls+'">'+SEV[x.sev].em+'</div><div class="bd"><b>'+x.tit+'</b><p>'+x.desc+'</p><div class="meta">'+x.meta+'</div></div></div>';}).join('')||'<div class="alert-row"><div class="ic ic-ok">✓</div><div class="bd"><b>Sin alertas</b></div></div>';
+ var top=h.slice(0,4).map(function(x){return '<div class="alert-row"><div class="ic ic-'+SEV[x.sev].cls+'">'+SEV[x.sev].em+'</div><div class="bd"><b>'+esc(x.tit)+'</b><p>'+esc(x.desc)+'</p><div class="meta">'+esc(x.meta)+'</div></div></div>';}).join('')||'<div class="alert-row"><div class="ic ic-ok">✓</div><div class="bd"><b>Sin alertas</b></div></div>';
  return '<div class="view-head"><div><h2>Tablero de control</h2><p>Estado de contratos, proyectos, recursos y seguridad. Las alertas son señales para verificar, no acusaciones.</p></div><span class="badge b-info">Rol: '+ROLES[ROL]+'</span></div>'+
  fuente('Todo lo que ve aquí se <b>calcula solo</b> a partir de los datos que la entidad cargó a mano en Contratos, Proyectos e Interventoría. Auditor-IA no inventa datos: solo cruza y señala.')+
  '<div class="card panel mb"><div class="semaforo"><div class="sem-circle '+sm.c+'">'+score+'</div><div class="sem-txt"><b>'+sm.t+'</b><p>'+sm.p+' Índice de seguridad de recursos: '+score+'/100 · Ciberseguridad: '+cyberPuntaje()+'/100.</p></div></div></div>'+
@@ -517,12 +521,12 @@ function repintar(){document.getElementById('views').innerHTML=RENDER[vista]();w
 RENDER.proyectos=function(){
  return '<div class="view-head"><div><h2>Avance de proyectos</h2><p>Avance físico (obra real) contra avance financiero (lo pagado). La alarma central contra el desvío de recursos.</p></div></div>'+
   fuente('El <b>avance físico</b> lo registra la interventoría y el <b>avance financiero</b> sale de los pagos. El <b>desfase</b> es una resta simple: financiero − físico. Si es alto, significa que se pagó más de lo construido.')+
-  contratos.map(function(c){var p=proyectos[c.id];if(!p)return '';var d=p.financiero-p.fisico;var s=d>=20?'rojo':d>=12?'naranja':d>=6?'amarillo':'ok';var enR=d>=12?Math.round(c.valor*d/100):0;return '<div class="card panel mb"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap"><div><h3>'+p.nombre+'</h3><div class="sub">'+c.id+' · Presupuesto '+fmt(c.valor)+' · '+c.contratista+'</div></div>'+chip(s)+'</div><div class="mt"><div style="font-size:12px;color:var(--suave);font-weight:700">AVANCE FÍSICO (obra real)</div><div class="bar"><i class="fis" style="width:'+p.fisico+'%"></i></div><div class="num" style="font-size:12px">'+p.fisico+'%</div>'+efis(c.id,p.fisico)+'</div><div class="mt"><div style="font-size:12px;color:var(--suave);font-weight:700">AVANCE FINANCIERO (ya pagado)</div><div class="bar"><i class="fin" style="width:'+p.financiero+'%"></i></div><div class="num" style="font-size:12px">'+p.financiero+'%</div></div><div class="mt" style="background:var(--'+SEV[s].cls+'-bg);border-radius:10px;padding:10px 13px;font-size:13.5px">'+SEV[s].em+' Desfase = '+p.financiero+'% − '+p.fisico+'% = <b>'+d+' puntos</b>.'+(enR?' Recursos en riesgo: <b>'+fmt(enR)+'</b>.':' Pago y obra en línea.')+'</div></div>';}).join('');
+  contratos.map(function(c){var p=proyectos[c.id];if(!p)return '';var d=p.financiero-p.fisico;var s=d>=20?'rojo':d>=12?'naranja':d>=6?'amarillo':'ok';var enR=d>=12?Math.round(c.valor*d/100):0;return '<div class="card panel mb"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap"><div><h3>'+esc(p.nombre)+'</h3><div class="sub">'+esc(c.id)+' · Presupuesto '+fmt(c.valor)+' · '+esc(c.contratista)+'</div></div>'+chip(s)+'</div><div class="mt"><div style="font-size:12px;color:var(--suave);font-weight:700">AVANCE FÍSICO (obra real)</div><div class="bar"><i class="fis" style="width:'+p.fisico+'%"></i></div><div class="num" style="font-size:12px">'+p.fisico+'%</div>'+efis(c.id,p.fisico)+'</div><div class="mt"><div style="font-size:12px;color:var(--suave);font-weight:700">AVANCE FINANCIERO (ya pagado)</div><div class="bar"><i class="fin" style="width:'+p.financiero+'%"></i></div><div class="num" style="font-size:12px">'+p.financiero+'%</div></div><div class="mt" style="background:var(--'+SEV[s].cls+'-bg);border-radius:10px;padding:10px 13px;font-size:13.5px">'+SEV[s].em+' Desfase = '+p.financiero+'% − '+p.fisico+'% = <b>'+d+' puntos</b>.'+(enR?' Recursos en riesgo: <b>'+fmt(enR)+'</b>.':' Pago y obra en línea.')+'</div></div>';}).join('');
 };
 
 RENDER.cruces=function(){
- var fichasC=crucesContratista().map(function(x){return '<div class="ficha"><div class="cab"><div><b>'+x.nombre+'</b><div class="ced">NIT/CC '+x.nit+' · '+x.items.length+' contrato(s)</div></div>'+chip(x.sev)+'</div><div class="mini">'+x.items.map(function(i){return '<div class="it">'+luces(i.sev)+' '+i.c.id+' — '+i.c.obj+'</div>';}).join('')+'</div>'+(x.items.length>1&&x.enAlerta>0?'<div class="mini" style="color:var(--rojo);font-weight:600;margin-top:6px">⚠️ Misma cédula en varios contratos y '+x.enAlerta+' con alerta: revisar todos sus contratos.</div>':'')+'</div>';}).join('');
- var oi=omisionesInterventor();var fichasI=oi.length?oi.map(function(x){return '<div class="ficha"><div class="cab"><div><b>'+x.nombre+'</b><div class="ced">Interventor · CC '+x.ced+'</div></div><span class="badge b-rojo">⛔ Posible omisión</span></div><div class="mini">Aprobó pese a alertas: '+x.omitidos.map(function(i){return i.c.id;}).join(', ')+'</div></div>';}).join(''):'<div class="ficha muted">Ningún interventor con omisiones detectadas.</div>';
+ var fichasC=crucesContratista().map(function(x){return '<div class="ficha"><div class="cab"><div><b>'+esc(x.nombre)+'</b><div class="ced">NIT/CC '+esc(x.nit)+' · '+x.items.length+' contrato(s)</div></div>'+chip(x.sev)+'</div><div class="mini">'+x.items.map(function(i){return '<div class="it">'+luces(i.sev)+' '+esc(i.c.id)+' — '+esc(i.c.obj)+'</div>';}).join('')+'</div>'+(x.items.length>1&&x.enAlerta>0?'<div class="mini" style="color:var(--rojo);font-weight:600;margin-top:6px">⚠️ Misma cédula en varios contratos y '+x.enAlerta+' con alerta: revisar todos sus contratos.</div>':'')+'</div>';}).join('');
+ var oi=omisionesInterventor();var fichasI=oi.length?oi.map(function(x){return '<div class="ficha"><div class="cab"><div><b>'+esc(x.nombre)+'</b><div class="ced">Interventor · CC '+esc(x.ced)+'</div></div><span class="badge b-rojo">⛔ Posible omisión</span></div><div class="mini">Aprobó pese a alertas: '+esc(x.omitidos.map(function(i){return i.c.id;}).join(', '))+'</div></div>';}).join(''):'<div class="ficha muted">Ningún interventor con omisiones detectadas.</div>';
  return '<div class="view-head"><div><h2>Cruces de información</h2><p>Relaciona cédulas, NIT, contratistas e interventores entre todos los contratos.</p></div></div>'+
   fuente('Los cruces se arman <b>solos</b> comparando el NIT/cédula que la entidad escribió en cada contrato. No consultan fuentes externas en esta demostración.')+
   '<div class="card mb"><div class="panel"><h3>Por contratista / beneficiario</h3><div class="sub">Un mismo NIT o cédula en varios contratos.</div></div><div style="padding:0 16px 10px">'+fichasC+'</div></div><div class="card"><div class="panel"><h3>Vigilancia del vigilante</h3><div class="sub">Interventores que aprobaron contratos pese a tener alertas.</div></div><div style="padding:0 16px 10px">'+fichasI+'</div></div>';
@@ -550,13 +554,13 @@ function toggleChk(i){checklist[i].on=!checklist[i].on;log((checklist[i].on?'Cum
 RENDER.hallazgos=function(){
  var h=hallazgos();
  var rows=h.map(function(x){var e=seg[x.key]||{estado:'abierto',resp:'',fecha:'',nota:''};var ecls=e.estado==='cerrado'?'b-ok':e.estado==='en_proceso'?'b-naranja':'b-rojo';var elbl=e.estado==='cerrado'?'Cerrado':e.estado==='en_proceso'?'En proceso':'Abierto';
-  return '<div class="alert-row"><div class="ic ic-'+SEV[x.sev].cls+'">'+SEV[x.sev].em+'</div><div class="bd"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>'+x.tit+'</b>'+chip(x.sev)+'<span class="est-tag '+ecls+'">'+elbl+'</span></div><p>'+x.desc+'</p><div class="meta">'+x.meta+'</div>'+
+  return '<div class="alert-row"><div class="ic ic-'+SEV[x.sev].cls+'">'+SEV[x.sev].em+'</div><div class="bd"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>'+esc(x.tit)+'</b>'+chip(x.sev)+'<span class="est-tag '+ecls+'">'+elbl+'</span></div><p>'+esc(x.desc)+'</p><div class="meta">'+esc(x.meta)+'</div>'+
    '<div class="seg">'+
     '<div class="field"><label>Estado</label><select id="e_'+x.key+'"><option value="abierto"'+(e.estado==='abierto'?' selected':'')+'>Abierto</option><option value="en_proceso"'+(e.estado==='en_proceso'?' selected':'')+'>En proceso</option><option value="cerrado"'+(e.estado==='cerrado'?' selected':'')+'>Cerrado</option></select></div>'+
-    '<div class="field"><label>Responsable de corregir</label><input id="r_'+x.key+'" value="'+(e.resp||'').replace(/"/g,'&quot;')+'" placeholder="Nombre y cargo"></div>'+
+    '<div class="field"><label>Responsable de corregir</label><input id="r_'+x.key+'" value="'+esc(e.resp)+'" placeholder="Nombre y cargo"></div>'+
     '<div class="field"><label>Fecha límite para corregir</label><input id="f_'+x.key+'" type="date" value="'+(e.fecha||'')+'"></div>'+
-    '<div class="field" style="flex:2;min-width:160px"><label>Nota: ¿qué se hizo o se decidió?</label><input id="n_'+x.key+'" value="'+(e.nota||'').replace(/"/g,'&quot;')+'" placeholder="Breve"></div>'+
-    '<div class="acc"><button class="btn btn-verde btn-sm" onclick="guardarHallazgo(\''+x.key+'\')">Guardar seguimiento</button>'+(e.resp||e.nota||e.fecha?'<span class="muted" style="font-size:12px">Último guardado por '+(e.por||'—')+'</span>':'<span class="muted" style="font-size:12px">Sin guardar aún</span>')+'</div>'+
+    '<div class="field" style="flex:2;min-width:160px"><label>Nota: ¿qué se hizo o se decidió?</label><input id="n_'+x.key+'" value="'+esc(e.nota)+'" placeholder="Breve"></div>'+
+    '<div class="acc"><button class="btn btn-verde btn-sm" onclick="guardarHallazgo(\''+x.key+'\')">Guardar seguimiento</button>'+(e.resp||e.nota||e.fecha?'<span class="muted" style="font-size:12px">Último guardado por '+esc(e.por||'—')+'</span>':'<span class="muted" style="font-size:12px">Sin guardar aún</span>')+'</div>'+
    '</div></div></div>';}).join('');
  return '<div class="view-head"><div><h2>Hallazgos y su cierre</h2><p>Asigne responsable y fecha, escriba qué pasó y pulse <b>Guardar seguimiento</b>. Cada cambio queda en la bitácora.</p></div><button class="btn btn-ghost btn-sm" onclick="ir(\'informe\')">Generar informe</button></div>'+
   fuente('Los hallazgos los <b>detecta Auditor-IA solo</b> con los datos cargados. Lo que usted escribe aquí (responsable, fecha, nota) es la <b>gestión</b> para cerrarlos, y sí se guarda al pulsar el botón.')+
@@ -584,12 +588,12 @@ RENDER.vencimientos=function(){
  var items=[];
  contratos.forEach(function(c){if(c.poliza&&c.finPoliza){items.push({d:diasA(c.finPoliza),tit:'Póliza — '+c.id,sub:c.contratista,fecha:c.finPoliza,tipo:'Póliza'});}else if(!c.poliza){items.push({d:-999,tit:'Póliza ausente — '+c.id,sub:c.contratista,fecha:'—',tipo:'Póliza'});}items.push({d:diasA(c.fin),tit:'Fin de contrato — '+c.id,sub:c.obj,fecha:c.fin,tipo:'Plazo'});});
  items.sort(function(a,b){return a.d-b.d;});
- var rows=items.map(function(x){var sev=x.d<0?'rojo':x.d<=10?'naranja':x.d<=30?'amarillo':'ok';var txt=x.d<-900?'Sin registrar':x.d<0?'Vencido hace '+(-x.d)+' días':x.d===0?'Vence hoy':'En '+x.d+' días';return '<tr><td>'+luces(sev)+' <b>'+x.tit+'</b><br><small class="muted">'+x.sub+'</small></td><td>'+x.tipo+'</td><td class="num">'+x.fecha+'</td><td>'+chip(sev)+' <small class="muted">'+txt+'</small></td></tr>';}).join('');
+ var rows=items.map(function(x){var sev=x.d<0?'rojo':x.d<=10?'naranja':x.d<=30?'amarillo':'ok';var txt=x.d<-900?'Sin registrar':x.d<0?'Vencido hace '+(-x.d)+' días':x.d===0?'Vence hoy':'En '+x.d+' días';return '<tr><td>'+luces(sev)+' <b>'+esc(x.tit)+'</b><br><small class="muted">'+esc(x.sub)+'</small></td><td>'+x.tipo+'</td><td class="num">'+esc(x.fecha)+'</td><td>'+chip(sev)+' <small class="muted">'+txt+'</small></td></tr>';}).join('');
  return '<div class="view-head"><div><h2>Control de vencimientos</h2><p>Pólizas, garantías y plazos próximos a vencer.</p></div></div>'+fuente('Se calcula con las fechas que la entidad cargó en cada contrato. En producción, Auditor-IA avisa por correo (Brevo) y al WhatsApp de soporte antes de que caduquen.')+'<div class="tbl-wrap"><table><thead><tr><th>Concepto</th><th>Tipo</th><th>Fecha</th><th>Estado</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
 };
 
 RENDER.bitacora=function(){
- var rows=bitacora.length?bitacora.map(function(x){return '<div class="bit-row"><time>'+x.t+'</time><div><b>'+x.u+'</b> — '+x.txt+'</div></div>';}).join(''):'<div class="bit-row muted">Sin movimientos aún.</div>';
+ var rows=bitacora.length?bitacora.map(function(x){return '<div class="bit-row"><time>'+esc(x.t)+'</time><div><b>'+esc(x.u)+'</b> — '+esc(x.txt)+'</div></div>';}).join(''):'<div class="bit-row muted">Sin movimientos aún.</div>';
  return '<div class="view-head"><div><h2>Bitácora de auditoría</h2><p>Registro de quién hizo qué y cuándo. Da trazabilidad y valor al informe.</p></div></div>'+fuente('Se llena sola cada vez que alguien ingresa, marca un requisito o guarda un hallazgo. En producción el registro es inalterable y queda en el servidor.')+'<div class="card panel">'+rows+'</div>';
 };
 
@@ -611,10 +615,10 @@ function quitarUsuario(i){var u=usuarios[i];usuarios.splice(i,1);log('Quitó usu
 var alcance='consolidado';
 RENDER.informe=function(){
  var opts='<option value="consolidado">Consolidado (toda la entidad)</option>';
- contratos.forEach(function(c){opts+='<option value="proyecto:'+c.id+'">Proyecto '+c.id+'</option>';});
- var vC={};contratos.forEach(function(c){if(!vC[c.nitCont]){vC[c.nitCont]=1;opts+='<option value="contratista:'+c.nitCont+'">Contratista — '+c.contratista+'</option>';}});
- var vI={};contratos.forEach(function(c){if(!vI[c.cedInt]){vI[c.cedInt]=1;opts+='<option value="interventor:'+c.cedInt+'">Interventor — '+c.interventor+'</option>';}});
- opts+='<option value="cyber:1">Solo ciberseguridad</option><option value="entidad:'+EMPRESA.nit+'">Entidad — NIT '+EMPRESA.nit+'</option>';
+ contratos.forEach(function(c){opts+='<option value="proyecto:'+esc(c.id)+'">Proyecto '+esc(c.id)+'</option>';});
+ var vC={};contratos.forEach(function(c){if(!vC[c.nitCont]){vC[c.nitCont]=1;opts+='<option value="contratista:'+esc(c.nitCont)+'">Contratista — '+esc(c.contratista)+'</option>';}});
+ var vI={};contratos.forEach(function(c){if(!vI[c.cedInt]){vI[c.cedInt]=1;opts+='<option value="interventor:'+esc(c.cedInt)+'">Interventor — '+esc(c.interventor)+'</option>';}});
+ opts+='<option value="cyber:1">Solo ciberseguridad</option><option value="entidad:'+esc(EMPRESA.nit)+'">Entidad — NIT '+esc(EMPRESA.nit)+'</option>';
  opts=opts.replace('value="'+alcance+'"','value="'+alcance+'" selected');
  return '<div class="view-head"><div><h2>Informe de auditoría</h2><p>Resumen para la gerencia o el órgano de control. Elija el alcance.</p></div><div class="row-inline"><button class="btn btn-primary btn-sm" style="width:auto" onclick="descargarPDF()">Descargar PDF</button><button class="btn btn-verde btn-sm" onclick="copiarInforme()">Copiar</button></div></div><div class="field mb no-print" style="max-width:380px"><label for="alcSel">Alcance del informe</label><select id="alcSel" onchange="alcance=this.value;repintar()">'+opts+'</select></div>'+docInforme();
 };
@@ -623,7 +627,7 @@ function etq(){if(alcance==='consolidado')return 'Consolidado — '+esc(EMPRESA.
 function docInforme(){
  var h=filtrar(hallazgos());var R=h.filter(function(x){return x.sev==='rojo';}),N=h.filter(function(x){return x.sev==='naranja';}),A=h.filter(function(x){return x.sev==='amarillo';});
  var hoy=new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
- var li=function(arr){return arr.length?arr.map(function(x){var e=seg[x.key];var est=e&&e.estado?' — <i>'+(e.estado==='cerrado'?'Cerrado':e.estado==='en_proceso'?'En proceso':'Abierto')+(e.resp?', resp. '+e.resp:'')+'</i>':'';return '<li><b>'+x.tit+'</b>: '+x.desc+est+'</li>';}).join(''):'<li>Ninguno.</li>';};
+ var li=function(arr){return arr.length?arr.map(function(x){var e=seg[x.key];var est=e&&e.estado?' — <i>'+(e.estado==='cerrado'?'Cerrado':e.estado==='en_proceso'?'En proceso':'Abierto')+(e.resp?', resp. '+esc(e.resp):'')+'</i>':'';return '<li><b>'+esc(x.tit)+'</b>: '+esc(x.desc)+est+'</li>';}).join(''):'<li>Ninguno.</li>';};
  return '<div class="informe" id="docInforme"><div class="doc-head"><div><h3>Informe de Auditoría Integral</h3><div class="rol-line">'+etq()+'</div><div class="rol-line">Generado por: '+ROLES[ROL]+' · '+hoy+'</div></div><svg viewBox="0 0 200 200" style="width:54px;height:54px" aria-hidden="true"><rect x="4" y="4" width="192" height="192" rx="46" fill="#1E3A4C"/><circle cx="100" cy="42" r="13" fill="#E0A21A"/><circle cx="100" cy="100" r="20" fill="#E0A21A"/><g fill="#fff"><circle cx="150.2" cy="71" r="9"/><circle cx="49.8" cy="129" r="9"/></g></svg></div>'+
   '<div class="aviso-legal"><b>Aviso importante:</b> este informe presenta indicios y alertas basados en los datos registrados. <b>No constituye una acusación ni una prueba.</b> Los hallazgos deben ser verificados y confirmados por los responsables competentes antes de tomar cualquier decisión o acción.</div>'+
   '<section><h4>Resumen</h4><ul><li>Alertas: <b>'+R.length+' rojas</b>, <b>'+N.length+' naranjas</b>, <b>'+A.length+' amarillas</b>.</li><li>Alcance: '+etq()+'.</li>'+(alcance.indexOf('cyber')<0?'<li>Índice de ciberseguridad: <b>'+cyberPuntaje()+'/100</b>.</li>':'')+'</ul></section>'+
@@ -673,7 +677,7 @@ function guardarPago(){var v=document.getElementById('pagHasta').value;if(v){EMP
 
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function finDeMes(){var d=new Date();var f=new Date(d.getFullYear(),d.getMonth()+1,0);return f.toISOString().slice(0,10);}
-var _tt;function toast(m){var t=document.getElementById('toast');t.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span>'+m+'</span>';t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show');},4200);}
+var _tt;function toast(m,tipo){var t=document.getElementById('toast');if(!t)return;var s=String(m==null?'':m);var err=tipo==='error';var ok=tipo==='ok'||(tipo===undefined&&/^✓/.test(s));t.classList.toggle('t-err',err);t.classList.toggle('t-ok',ok&&!err);var ic=err?'<path d="M18 6 6 18M6 6l12 12"/>':ok?'<path d="M20 6L9 17l-5-5"/>':'<circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4"/>';t.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">'+ic+'</svg><span>'+esc(s)+'</span>';t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show');},4200);}
 
 /* ===================== ESCRITURA: Neon en producción / memoria en demo ===================== */
 async function agregarContrato(){
@@ -686,17 +690,17 @@ async function agregarContrato(){
   var nuevo=ins&&ins[0]?mapContrato(ins[0]):null;
   if(nuevo&&(fis||finp)){await q(N().from('proyecto').insert({entidad_id:ENTIDAD_ID,contrato_id:nuevo._uuid,nombre:obj,fisico:fis,financiero:finp,presupuesto:valor}).select());}
   log('Registró el contrato '+id);await cargarDatos();toast('✓ Contrato '+id+' registrado y analizado.');contratoVista='lista';repintar();
- }catch(e){toast('No se pudo guardar: '+trad(e));}
+ }catch(e){toast('No se pudo guardar: '+trad(e),'error');}
 }
 async function toggleChk(i){var it=checklist[i];if(!it)return;var nuevo=!it.on;
  if(DEMO){it.on=nuevo;log((nuevo?'Cumplió':'Revirtió')+' requisito: '+it.t);toast(nuevo?'✓ Requisito marcado como cumplido':'Requisito desmarcado');repintar();return;}
  try{await q(N().from('requisito').update({cumplido:nuevo}).eq('id',it._uuid));it.on=nuevo;log((nuevo?'Cumplió':'Revirtió')+' requisito: '+it.t);toast(nuevo?'✓ Requisito marcado como cumplido':'Requisito desmarcado');repintar();}
- catch(e){toast('No se pudo guardar: '+trad(e));}
+ catch(e){toast('No se pudo guardar: '+trad(e),'error');}
 }
 async function setCyber(i,v){var it=cyberQ[i];if(!it)return;
  if(DEMO){it.a=v;log('Autodiagnóstico ciber actualizado');toast('✓ Respuesta guardada');repintar();return;}
  try{if(it._uuid){await q(N().from('cyber_respuesta').update({respuesta:v}).eq('id',it._uuid));}else{var ins=await q(N().from('cyber_respuesta').insert({entidad_id:ENTIDAD_ID,pregunta:it.q,marco:it.m,respuesta:v}).select());if(ins&&ins[0])it._uuid=ins[0].id;}it.a=v;log('Autodiagnóstico ciber actualizado');toast('✓ Respuesta guardada');repintar();}
- catch(e){toast('No se pudo guardar: '+trad(e));}
+ catch(e){toast('No se pudo guardar: '+trad(e),'error');}
 }
 async function guardarHallazgo(k){var est=gv('e_'+k),resp=gv('r_'+k),fecha=gv('f_'+k),nota=gv('n_'+k);
  if(DEMO){seg[k]={estado:est,resp:resp,fecha:fecha,nota:nota,por:ROLES[ROL]};log('Guardó seguimiento del hallazgo ('+est+')'+(resp?' · resp. '+resp:''));toast('✓ Seguimiento guardado'+(est==='cerrado'?' · hallazgo cerrado':''));repintar();return;}
@@ -705,16 +709,16 @@ async function guardarHallazgo(k){var est=gv('e_'+k),resp=gv('r_'+k),fecha=gv('f
   else{var ins=await q(N().from('hallazgo_seg').insert({entidad_id:ENTIDAD_ID,clave:k,estado:est,responsable:resp,fecha_limite:fecha||null,nota:nota}).select());if(ins&&ins[0])ex=ins[0].id;}
   seg[k]={estado:est,resp:resp,fecha:fecha,nota:nota,por:usuarioNombre,_uuid:ex};
   log('Guardó seguimiento del hallazgo ('+est+')'+(resp?' · resp. '+resp:''));toast('✓ Seguimiento guardado'+(est==='cerrado'?' · hallazgo cerrado':''));repintar();
- }catch(e){toast('No se pudo guardar: '+trad(e));}
+ }catch(e){toast('No se pudo guardar: '+trad(e),'error');}
 }
 async function agregarUsuario(){var n=gv('u_nom').trim(),c=gv('u_cor').trim(),r=gv('u_rol');
  if(DEMO){if(!n||!c){toast('Escriba nombre y correo.');return;}usuarios.push({nombre:n,correo:c,rol:r});log('Agregó usuario '+n+' ('+ROLES[r]+')');toast('✓ Usuario agregado');repintar();return;}
  try{var res=await rpc('nuevo_codigo',{p_entidad:ENTIDAD_ID,p_rol:r});if(!res||!res.ok){toast((res&&res.error)||'No autorizado.');return;}log('Generó código de acceso ('+ROLES[r]+')');window.__codigoNuevo={codigo:res.codigo,rol:r};repintar();}
- catch(e){toast('No se pudo: '+trad(e));}
+ catch(e){toast('No se pudo: '+trad(e),'error');}
 }
 function quitarUsuario(i){if(DEMO){var u=usuarios[i];usuarios.splice(i,1);log('Quitó usuario '+(u?u.nombre:''));toast('Usuario quitado');repintar();return;}toast('Para retirar a un usuario, escríbanos a contacto@skynetgenesis.com. (La gestión se hace con códigos de acceso.)');}
 function setParam(k,v){if(k==='numEnt'){EMPRESA.numEnt=Math.max(1,parseInt(v||'1'));}else{EMPRESA[k]=v;if(k==='alcance'&&v==='varias'&&(!EMPRESA.numEnt||EMPRESA.numEnt<1))EMPRESA.numEnt=5;}if(k==='nombre'){var en=document.getElementById('empName');if(en)en.textContent=v;}
- if(!DEMO&&ENTIDAD_ID&&(k==='nombre'||k==='nit'||k==='tipo')){var patch={};patch[k]=v;q(N().from('entidad').update(patch).eq('id',ENTIDAD_ID)).catch(function(e){toast('No se pudo guardar: '+trad(e));});}
+ if(!DEMO&&ENTIDAD_ID&&(k==='nombre'||k==='nit'||k==='tipo')){var patch={};patch[k]=v;q(N().from('entidad').update(patch).eq('id',ENTIDAD_ID)).catch(function(e){toast('No se pudo guardar: '+trad(e),'error');});}
  log('Parametrización: '+k+' = '+v);toast('✓ Parametrización actualizada');repintar();
 }
 function estadoPago(){var hoy=new Date(hoyISO+'T00:00:00');
@@ -730,7 +734,7 @@ function pagarBold(){if(DEMO){toast('Esto es una demostración: no se cobra nada
 /* ---------- Superadmin: crear entidad ---------- */
 async function crearEntidad(){var n=gv('se_nom').trim(),nit=gv('se_nit').trim(),tipo=gv('se_tipo'),plan=gv('se_plan');if(!n){toast('Escriba el nombre de la entidad.');return;}
  try{var res=await rpc('crear_entidad',{p_nombre:n,p_nit:nit||null,p_tipo:tipo,p_plan:plan});if(!res||!res.ok){toast((res&&res.error)||'No autorizado.');return;}window.__codigoEntidad={nombre:n,codigo:res.codigo};toast('✓ Entidad creada');repintar();}
- catch(e){toast('No se pudo: '+trad(e));}
+ catch(e){toast('No se pudo: '+trad(e),'error');}
 }
 
 /* ---------- RENDER.admin (producción: cobro de solo lectura + Bold) ---------- */
@@ -787,7 +791,7 @@ function efis(id,v){return '<div class="row-inline no-print" style="margin-top:6
 async function setFisico(btn){var inp=btn.parentElement.querySelector('input');var key=inp.getAttribute('data-key');var p=proyectos[key];if(!p)return;var v=Math.max(0,Math.min(100,parseInt(inp.value||'0')||0));
  if(DEMO){p.fisico=v;log('Avance físico de '+key+' = '+v+'%');toast('✓ Avance físico actualizado');repintar();return;}
  try{if(p._uuid){await q(N().from('proyecto').update({fisico:v}).eq('id',p._uuid));}p.fisico=v;log('Avance físico de '+key+' = '+v+'%');toast('✓ Avance físico actualizado');repintar();}
- catch(e){toast('No se pudo guardar: '+trad(e));}
+ catch(e){toast('No se pudo guardar: '+trad(e),'error');}
 }
 
 /* ===================== Panel de impacto / ROI ===================== */
@@ -864,7 +868,7 @@ async function insertarContratos(filas,origen){
   for(var j=0;j<proy.length;j+=100){await q(N().from('proyecto').insert(proy.slice(j,j+100)).select());}
   log('Importó '+ins.length+' contratos ('+origen+')');
   await cargarDatos();toast('✓ '+ins.length+' contratos importados ('+origen+'). Ajuste el avance físico de las obras en Proyectos.');ir('contratos');
- }catch(e){toast('No se pudo importar: '+trad(e));}
+ }catch(e){toast('No se pudo importar: '+trad(e),'error');}
 }
 function plantillaCsv(){var h='codigo,objeto,contratista,nit,interventor,ced_interventor,ordenador,valor,ejecutado,fin,poliza,anticipo,fisico\n';var ej='C-2026-001,Construccion de parque,Constructora Ejemplo SAS,900123456,Laura Perez,22333444,Juan Gomez,150000000,60000000,2026-12-31,si,0,30\n';var blob=new Blob(["﻿"+h+ej],{type:'text/csv;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='plantilla-auditor-ia.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(a.href);},1500);toast('Plantilla descargada');}
 function onCsvFile(ev){var f=ev.target.files&&ev.target.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(){try{var filas=parseCSV(String(rd.result));if(!filas.length){document.getElementById('csvRes').innerHTML='<div class="card panel" style="background:var(--amarillo-bg);border-color:#EAD9A6">No se leyeron filas válidas. Revise que tenga las columnas y que código, objeto, contratista y valor estén llenos.</div>';return;}window.__csv=filas;document.getElementById('csvRes').innerHTML='<div class="pay-state" style="background:var(--verde-suave);color:var(--texto)"><div class="big" style="color:var(--verde-osc)">'+filas.length+' filas leídas</div></div><div class="mt"><button class="btn btn-verde" onclick="importarCsv()">Importar '+filas.length+' contratos</button></div>';}catch(e){document.getElementById('csvRes').innerHTML='<div class="card panel" style="background:var(--rojo-bg);border-color:#E7B7B0">No se pudo leer el CSV: '+esc(e.message||String(e))+'</div>';}};rd.readAsText(f,'utf-8');ev.target.value='';}
@@ -881,7 +885,7 @@ function parseCSV(txt){
  var head=rows[0].map(norm);
  var idx=function(names){for(var k=0;k<names.length;k++){var p=head.indexOf(names[k]);if(p>=0)return p;}return -1;};
  var M={codigo:idx(['codigo','contrato','referencia']),objeto:idx(['objeto','descripcion']),contratista:idx(['contratista','proveedor']),nit:idx(['nit','nit_contratista','documento','cedula']),interv:idx(['interventor','supervisor']),cedint:idx(['ced_interventor','cedint','cedula_interventor']),orden:idx(['ordenador','ordenador_del_gasto']),valor:idx(['valor','valor_del_contrato']),ejec:idx(['ejecutado','pagado','valor_pagado']),fin:idx(['fin','fecha_fin','terminacion']),pol:idx(['poliza','tiene_poliza']),ant:idx(['anticipo']),fis:idx(['fisico','avance_fisico'])};
- var out=[],num=function(s){return parseFloat(String(s||'').replace(/[^\d.-]/g,''))||0;};
+ var out=[],num=function(s){s=String(s==null?'':s).replace(/[^\d.,-]/g,'');if(!s)return 0;var neg=/-/.test(s);s=s.replace(/-/g,'');if(s.indexOf(',')>=0){s=s.replace(/\./g,'').replace(/,/g,'.');}else if(s.indexOf('.')>=0){var p=s.split('.');var miles=p.slice(1).every(function(z){return z.length===3;});if(p[0]!=='0'&&p[0]!==''&&miles)s=p.join('');}var n=parseFloat(s)||0;return neg?-n:n;};
  for(var r2=1;r2<rows.length;r2++){var c=rows[r2];if(!c.length||c.join('').trim()==='')continue;
   var g=function(k){return M[k]>=0?String(c[M[k]]||'').trim():'';};
   var cod=g('codigo'),obj=g('objeto'),con=g('contratista'),val=num(g('valor'));
@@ -923,11 +927,11 @@ function evidenciaCard(ambito,ref){
 }
 async function agregarEvidencia(ambito,ref,fid){var d=gv(fid+'_d').trim();if(!d){toast('Escriba la descripción.');return;}var u=gv(fid+'_u').trim();var e={ambito:ambito,ref:ref,descripcion:d,url:u,t:hoyISO};
  if(DEMO){e._uuid='e'+Date.now();evidencias.push(e);log('Adjuntó evidencia a '+ref);toast('✓ Evidencia adjunta');repintar();return;}
- try{var ins=await q(N().from('evidencia').insert({entidad_id:ENTIDAD_ID,ambito:ambito,ref:ref,descripcion:d,url:u}).select());if(ins&&ins[0])e._uuid=ins[0].id;evidencias.push(e);log('Adjuntó evidencia a '+ref);toast('✓ Evidencia adjunta');repintar();}catch(x){toast('No se pudo: '+trad(x));}
+ try{var ins=await q(N().from('evidencia').insert({entidad_id:ENTIDAD_ID,ambito:ambito,ref:ref,descripcion:d,url:u}).select());if(ins&&ins[0])e._uuid=ins[0].id;evidencias.push(e);log('Adjuntó evidencia a '+ref);toast('✓ Evidencia adjunta');repintar();}catch(x){toast('No se pudo: '+trad(x),'error');}
 }
 async function quitarEvidencia(id){
  if(DEMO){evidencias=evidencias.filter(function(x){return x._uuid!==id;});toast('Quitada');repintar();return;}
- try{await q(N().from('evidencia').delete().eq('id',id));evidencias=evidencias.filter(function(x){return x._uuid!==id;});toast('Quitada');repintar();}catch(e){toast('No se pudo: '+trad(e));}
+ try{await q(N().from('evidencia').delete().eq('id',id));evidencias=evidencias.filter(function(x){return x._uuid!==id;});toast('Quitada');repintar();}catch(e){toast('No se pudo: '+trad(e),'error');}
 }
 
 /* ---------- Beneficiario final / redes ---------- */
@@ -964,11 +968,11 @@ RENDER.denuncias=function(){
 };
 async function agregarDenuncia(){var a=gv('de_asunto').trim();if(!a){toast('Escriba el asunto.');return;}var contacto=gv('de_contacto').trim();var d={asunto:a,detalle:gv('de_detalle').trim(),contrato:gv('de_contrato').trim(),contacto:contacto,anonima:!contacto,estado:'nueva',t:hoyISO};
  if(DEMO){d._uuid='d'+Date.now();denuncias.unshift(d);log('Registró denuncia: '+a);toast('✓ Denuncia registrada');repintar();return;}
- try{var ins=await q(N().from('denuncia').insert({entidad_id:ENTIDAD_ID,asunto:d.asunto,detalle:d.detalle,contrato:d.contrato,contacto:d.contacto,anonima:d.anonima,estado:'nueva'}).select());if(ins&&ins[0])d._uuid=ins[0].id;denuncias.unshift(d);log('Registró denuncia: '+a);toast('✓ Denuncia registrada');repintar();}catch(e){toast('No se pudo: '+trad(e));}
+ try{var ins=await q(N().from('denuncia').insert({entidad_id:ENTIDAD_ID,asunto:d.asunto,detalle:d.detalle,contrato:d.contrato,contacto:d.contacto,anonima:d.anonima,estado:'nueva'}).select());if(ins&&ins[0])d._uuid=ins[0].id;denuncias.unshift(d);log('Registró denuncia: '+a);toast('✓ Denuncia registrada');repintar();}catch(e){toast('No se pudo: '+trad(e),'error');}
 }
 async function estadoDenuncia(id,est){var d=denuncias.find(function(x){return x._uuid===id;});if(!d)return;
  if(DEMO){d.estado=est;log('Denuncia '+est);toast('✓ Actualizada');repintar();return;}
- try{await q(N().from('denuncia').update({estado:est}).eq('id',id));d.estado=est;log('Denuncia '+est);toast('✓ Actualizada');repintar();}catch(e){toast('No se pudo: '+trad(e));}
+ try{await q(N().from('denuncia').update({estado:est}).eq('id',id));d.estado=est;log('Denuncia '+est);toast('✓ Actualizada');repintar();}catch(e){toast('No se pudo: '+trad(e),'error');}
 }
 
 /* ---------- Plan Anual de Auditoría ---------- */
@@ -988,11 +992,11 @@ RENDER.plan=function(){
 };
 async function agregarPlan(){var t=gv('pl_tema').trim();if(!t){toast('Escriba el tema.');return;}var p={anio:parseInt(gv('pl_anio'))||new Date().getFullYear(),tema:t,riesgo:gv('pl_riesgo'),periodo:gv('pl_periodo').trim(),responsable:gv('pl_resp').trim(),estado:'planeada'};
  if(DEMO){p._uuid='p'+Date.now();planAnual.push(p);log('Plan: agregó '+t);toast('✓ Agregado al plan');repintar();return;}
- try{var ins=await q(N().from('plan_auditoria').insert({entidad_id:ENTIDAD_ID,anio:p.anio,tema:p.tema,riesgo:p.riesgo,periodo:p.periodo,responsable:p.responsable,estado:'planeada'}).select());if(ins&&ins[0])p._uuid=ins[0].id;planAnual.push(p);log('Plan: agregó '+t);toast('✓ Agregado al plan');repintar();}catch(e){toast('No se pudo: '+trad(e));}
+ try{var ins=await q(N().from('plan_auditoria').insert({entidad_id:ENTIDAD_ID,anio:p.anio,tema:p.tema,riesgo:p.riesgo,periodo:p.periodo,responsable:p.responsable,estado:'planeada'}).select());if(ins&&ins[0])p._uuid=ins[0].id;planAnual.push(p);log('Plan: agregó '+t);toast('✓ Agregado al plan');repintar();}catch(e){toast('No se pudo: '+trad(e),'error');}
 }
 async function quitarPlan(id){
  if(DEMO){planAnual=planAnual.filter(function(x){return x._uuid!==id;});toast('Quitado');repintar();return;}
- try{await q(N().from('plan_auditoria').delete().eq('id',id));planAnual=planAnual.filter(function(x){return x._uuid!==id;});toast('Quitado');repintar();}catch(e){toast('No se pudo: '+trad(e));}
+ try{await q(N().from('plan_auditoria').delete().eq('id',id));planAnual=planAnual.filter(function(x){return x._uuid!==id;});toast('Quitado');repintar();}catch(e){toast('No se pudo: '+trad(e),'error');}
 }
 
 /* ---------- Multientidad (consolidado) ---------- */
