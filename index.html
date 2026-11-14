@@ -729,7 +729,16 @@ function estadoPago(){var hoy=new Date(hoyISO+'T00:00:00');
  return {key:'cerrada',label:'Cerrada por pago',msg:'Acceso cerrado por falta de pago. Pague con Bold para reactivar; el bloqueo lo aplica el servidor.'};
 }
 function planActual(){var c=contratos.length;return c<=25?'basico':c<=100?'profesional':'control';}
-function pagarBold(){if(DEMO){toast('Esto es una demostración: no se cobra nada. En producción abre la pasarela de Bold.');return;}if(!ENTIDAD_ID){toast('Primero active su entidad.');return;}var url='https://skynetgenesis.com/bold-firma.php?plan=auditor-ia:'+planActual()+'&empresa='+encodeURIComponent(ENTIDAD_ID)+'&meses=1&volver='+encodeURIComponent(location.origin+location.pathname);window.open(url,'_blank');log('Abrió el pago con Bold ('+planActual()+')');}
+function _boldAbrir(d){function go(){try{new window.BoldCheckout({orderId:d.orderId,currency:d.currency,amount:String(d.amount),apiKey:d.apiKey,integritySignature:d.signature,description:d.description||'Auditor-IA',redirectionUrl:d.redirectionUrl||(location.origin+location.pathname)}).open();}catch(e){toast('No se pudo abrir la pasarela de Bold: '+e,'error');}}
+ if(window.BoldCheckout){go();return;}
+ var s=document.createElement('script');s.src='https://checkout.bold.co/library/boldPaymentButton.js';s.onload=go;s.onerror=function(){toast('No se pudo cargar la pasarela de Bold. Revise su conexión.','error');};document.head.appendChild(s);}
+async function _boldFirmarYpagar(plan,empresa,meses){
+ var url='https://skynetgenesis.com/bold-firma.php?plan='+encodeURIComponent(plan)+'&empresa='+encodeURIComponent(empresa)+'&meses='+(meses||1)+'&volver='+encodeURIComponent(location.origin+location.pathname);
+ try{var r=await fetch(url);var d=await r.json();if(!d||!d.ok){toast('No se pudo iniciar el pago'+(d&&d.error?' ('+d.error+')':'')+'. Intente de nuevo.','error');return;}toast('Abriendo la pasarela de Bold…');_boldAbrir(d);}
+ catch(e){toast('No se pudo conectar con el sistema de pagos: '+e,'error');}
+}
+function pagarBold(){if(DEMO){toast('Esto es una demostración: no se cobra nada. En producción abre la pasarela de Bold.');return;}if(!ENTIDAD_ID){toast('Primero active su entidad.');return;}log('Abrió el pago con Bold ('+planActual()+')');_boldFirmarYpagar('auditor-ia:'+planActual(),ENTIDAD_ID,1);}
+function pagoPruebaBold(){if(DEMO){toast('Esto es una demostración: no se cobra nada.');return;}if(!SUPER){toast('Solo el superadministrador puede hacer el pago de prueba.');return;}log('Superadmin: inició el pago de prueba de $1.000');_boldFirmarYpagar('auditor-ia:prueba','plataforma',1);}
 
 /* ---------- Superadmin: crear entidad ---------- */
 async function crearEntidad(){var n=gv('se_nom').trim(),nit=gv('se_nit').trim(),tipo=gv('se_tipo'),plan=gv('se_plan');if(!n){toast('Escriba el nombre de la entidad.');return;}
@@ -749,7 +758,8 @@ RENDER.admin=function(){
    '<div class="field"><label>Tipo</label><select id="se_tipo">'+TIPOS_ENTIDAD.map(function(t){return '<option>'+t+'</option>';}).join('')+'</select></div>'+
    '<div class="field"><label>Plan</label><select id="se_plan"><option value="basico">Básico</option><option value="profesional">Profesional</option><option value="control">Control</option></select></div>'+
    '</div><div class="mt"><button class="btn btn-verde" onclick="crearEntidad()">Crear entidad y generar código</button></div>'+
-   (ce?'<div class="pay-state pay-activa mt"><div class="big">Entidad creada: '+esc(ce.nombre)+'</div><div>Código de activación del administrador: <b style="font-size:18px;letter-spacing:1px">'+esc(ce.codigo)+'</b></div><div style="font-size:12.5px;margin-top:4px">Entréguelo a la persona. Al registrarse lo escribe para quedar como Dirección/Control de esa entidad.</div></div>':'')+'</div>';
+   (ce?'<div class="pay-state pay-activa mt"><div class="big">Entidad creada: '+esc(ce.nombre)+'</div><div>Código de activación del administrador: <b style="font-size:18px;letter-spacing:1px">'+esc(ce.codigo)+'</b></div><div style="font-size:12.5px;margin-top:4px">Entréguelo a la persona. Al registrarse lo escribe para quedar como Dirección/Control de esa entidad.</div></div>':'')+'</div>'+
+   '<div class="card panel mb" style="border:2px solid var(--azul)"><h3>Prueba de conexión con Bold</h3><div class="sub">Pago real de $1.000 para verificar que los pagos de Bold quedaron conectados de punta a punta. Sí se cobra a su medio de pago.</div><div class="mt"><button class="btn btn-primary" style="width:auto" onclick="pagoPruebaBold()">Pago de prueba de $1.000</button></div></div>';
   if(ENTIDAD_ID===null){return '<div class="view-head"><div><h2>Panel de SkyNet Genesis</h2><p>Administración de la plataforma Auditor-IA.</p></div></div>'+superPanel;}
  }
  return '<div class="view-head"><div><h2>Administración y parametrización</h2><p>Tipo de entidad, alcance, precio y pago a SkyNet Genesis.</p></div></div>'+superPanel+
