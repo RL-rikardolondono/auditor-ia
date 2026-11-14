@@ -1,0 +1,14 @@
+{
+  "name": "Auditor-IA",
+  "short_name": "Auditor-IA",
+  "description": "Auditoría integral de contratos, proyectos, recursos y ciberseguridad. SkyNet Genesis.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F4F8FB",
+  "theme_color": "#0B4F8A",
+  "lang": "es",
+  "icons": [
+    { "src": "icono.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

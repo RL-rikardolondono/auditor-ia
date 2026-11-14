@@ -1,0 +1,1040 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Auditor-IA — Auditoría integral de contratos, proyectos, recursos y ciberseguridad para entidades públicas y privadas. SkyNet Genesis.">
+<meta name="theme-color" content="#0B4F8A">
+<title>Auditor-IA</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231E3A4C'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%23E0A21A'/%3E%3Ccircle cx='16' cy='7' r='2.6' fill='%23E0A21A'/%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Layout: panel de auditoría con ingreso, roles y menús por rol. Solo modo claro.
+     Color: identidad SkyNet Genesis. Type: Barlow Condensed (títulos) + Public Sans (texto). */
+  :root{
+    --azul:#0B4F8A;--azul2:#1867B0;--verde:#14A38B;--verde-osc:#0E8571;--whatsapp:#1F8A4C;--ambar:#E0A21A;
+    --bg:#F4F8FB;--surface:#FFFFFF;--texto:#1C2B39;--suave:#5D6B78;--borde:#DCE5EE;--azul-suave:#E8F1FA;--verde-suave:#E3F6F2;
+    --rojo:#C0392B;--rojo-bg:#FBE6E3;--naranja:#D35400;--naranja-bg:#FBE9D9;--amarillo:#B9820B;--amarillo-bg:#FBF1D8;--ok:#1F8A4C;--ok-bg:#E3F6EC;
+    --r:14px;--r-sm:9px;--sombra:0 1px 3px rgba(11,79,138,.07),0 6px 20px rgba(11,79,138,.06);color-scheme:light;
+    --f-tit:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;--f-txt:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--bg);color:var(--texto);font-family:var(--f-txt);line-height:1.5;-webkit-font-smoothing:antialiased}
+  h1,h2,h3,h4{font-family:var(--f-tit);font-weight:700;line-height:1.08;margin:0;text-wrap:balance;letter-spacing:.2px}
+  button{font-family:inherit}
+  .num{font-variant-numeric:tabular-nums}
+  #login{min-height:100%;display:flex;align-items:center;justify-content:center;padding:32px 16px}
+  .login-card{background:var(--surface);border:1px solid var(--borde);border-radius:20px;box-shadow:var(--sombra);max-width:450px;width:100%;padding:28px 26px 24px;text-align:center}
+  .login-card .logo-big{width:70px;height:70px;margin:0 auto 8px;display:block}
+  .login-card h1{font-size:40px;color:var(--azul);letter-spacing:.5px}
+  .login-card .ia{color:var(--verde)}
+  .tagline{color:var(--suave);font-size:14.5px;margin:6px 0 20px}
+  .field{text-align:left;margin-bottom:13px}
+  .field label{display:block;font-size:13px;font-weight:600;color:var(--suave);margin-bottom:5px}
+  select,input,textarea{width:100%;padding:11px 12px;border:1px solid var(--borde);border-radius:var(--r-sm);background:#fff;color:var(--texto);font-size:15px;font-family:inherit;color-scheme:light;accent-color:var(--verde)}
+  select:focus,input:focus,textarea:focus{outline:2px solid var(--azul2);outline-offset:0;border-color:var(--azul2)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:var(--r-sm);padding:12px 18px;font-size:15px;font-weight:700;cursor:pointer;transition:filter .15s,transform .05s}
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:linear-gradient(135deg,var(--azul),var(--azul2));color:#fff;width:100%}
+  .btn-primary:hover{filter:brightness(1.07)}
+  .btn-verde{background:var(--verde);color:#fff}.btn-verde:hover{background:var(--verde-osc)}
+  .btn-ghost{background:#fff;color:var(--azul);border:1px solid var(--borde)}.btn-ghost:hover{background:var(--azul-suave)}
+  .btn-sm{padding:7px 12px;font-size:13px;border-radius:8px}
+  .roles-info{text-align:left;font-size:12px;color:var(--suave);background:var(--azul-suave);border-radius:10px;padding:10px 12px;margin-top:4px}
+  .roles-info b{color:var(--azul)}
+  .demo-note{margin-top:14px;font-size:12.5px;color:var(--suave);background:var(--verde-suave);border-radius:10px;padding:10px 12px}
+  .demo-note b{color:var(--verde-osc)}
+  .topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:#fff;box-shadow:0 1px 0 var(--borde),0 2px 10px rgba(11,79,138,.05);display:flex;align-items:center;gap:12px;padding:10px 16px}
+  .brand{display:flex;align-items:center;gap:11px}
+  .topbar svg{width:34px;height:34px;flex:none}
+  .bt{font-family:var(--f-tit);font-weight:700;line-height:.92;font-size:15px}
+  .bt .g{color:var(--ambar)}.bt .s{color:var(--azul)}
+  .topbar .spacer{flex:1}
+  .who{display:flex;flex-direction:column;align-items:flex-end;gap:1px;max-width:52vw}
+  .who .emp{font-size:13px;font-weight:700;color:var(--azul);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:52vw}
+  .who .rol{font-size:11px;color:var(--suave)}
+  .link-salir{background:none;border:none;color:var(--suave);font-size:13px;cursor:pointer;font-weight:600;flex:none}.link-salir:hover{color:var(--rojo)}
+  .hamb{display:none;background:none;border:1px solid var(--borde);border-radius:8px;width:38px;height:38px;font-size:20px;color:var(--azul);cursor:pointer;flex:none;align-items:center;justify-content:center}
+  .shell{display:flex;align-items:flex-start;max-width:1140px;margin:0 auto}
+  .side{width:234px;flex:none;background:#fff;border-right:1px solid var(--borde);position:sticky;top:calc(55px + env(safe-area-inset-top,0px));height:calc(100dvh - 55px - env(safe-area-inset-top,0px));overflow-y:auto;padding:8px 10px 40px;scrollbar-width:thin}
+  .side .grp{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--suave);padding:14px 10px 6px}
+  .side .item{display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;text-align:left;padding:9px 11px;border-radius:10px;font-size:14px;font-weight:600;color:var(--texto);cursor:pointer;margin-bottom:2px}
+  .side .item .ico{width:26px;height:26px;border-radius:7px;background:var(--azul-suave);display:flex;align-items:center;justify-content:center;font-size:15px;flex:none}
+  .side .item:hover{background:var(--azul-suave)}
+  .side .item.active{background:var(--verde-suave);color:var(--verde-osc)}
+  .side .item.active .ico{background:var(--verde);color:#fff}
+  .wrap{flex:1;min-width:0;max-width:860px;margin:0;padding:18px 16px 80px}
+  .ovl{display:none}
+  @media(max-width:820px){
+    .hamb{display:flex}
+    .shell{display:block}
+    .side{position:fixed;left:0;top:0;width:264px;height:100dvh;z-index:60;transform:translateX(-100%);transition:transform .22s;box-shadow:0 10px 40px rgba(0,0,0,.28);padding-top:16px}
+    body.menu .side{transform:none}
+    body.menu .ovl{display:block;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:55}
+  }
+  .view-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+  .view-head h2{font-size:27px;color:var(--azul)}
+  .view-head p{margin:2px 0 0;color:var(--suave);font-size:13.5px;max-width:62ch}
+  .fuente{background:var(--azul-suave);border:1px solid #cfe0f2;border-radius:10px;padding:9px 13px;font-size:12.5px;color:var(--azul);margin-bottom:14px;display:flex;gap:8px;align-items:flex-start}
+  .fuente svg{width:16px;height:16px;flex:none;margin-top:1px}
+  .grid{display:grid;gap:14px}
+  .kpis{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+  .card{background:var(--surface);border:1px solid var(--borde);border-radius:var(--r);box-shadow:var(--sombra)}
+  .kpi{padding:16px}
+  .kpi .lbl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--suave)}
+  .kpi .val{font-family:var(--f-tit);font-weight:700;font-size:34px;margin-top:3px;line-height:1}
+  .kpi .sub{font-size:12.5px;color:var(--suave);margin-top:3px}
+  .kpi.s-rojo{background:var(--rojo-bg);border-color:#F3C9C3}.kpi.s-rojo .val{color:var(--rojo)}
+  .kpi.s-naranja .val{color:var(--naranja)}.kpi.s-amarillo .val{color:var(--amarillo)}.kpi.s-ok .val{color:var(--ok)}.kpi.s-azul .val{color:var(--azul)}
+  .panel{padding:16px}
+  .panel h3{font-size:19px;margin-bottom:3px}
+  .panel .sub{font-size:13px;color:var(--suave);margin-bottom:12px}
+  .semaforo{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .sem-circle{width:74px;height:74px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-family:var(--f-tit);font-weight:700;font-size:30px;color:#fff;box-shadow:inset 0 -4px 10px rgba(0,0,0,.12)}
+  .sem-rojo{background:var(--rojo)}.sem-naranja{background:var(--naranja)}.sem-amarillo{background:var(--ambar)}.sem-ok{background:var(--ok)}
+  .sem-txt b{font-family:var(--f-tit);font-size:20px}
+  .sem-txt p{margin:2px 0 0;color:var(--suave);font-size:13.5px;max-width:52ch}
+  .badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .b-rojo{background:var(--rojo-bg);color:var(--rojo)}.b-naranja{background:var(--naranja-bg);color:var(--naranja)}.b-amarillo{background:var(--amarillo-bg);color:var(--amarillo)}.b-ok{background:var(--ok-bg);color:var(--ok)}.b-info{background:var(--azul-suave);color:var(--azul)}
+  .luz{width:12px;height:12px;border-radius:50%;display:inline-block;flex:none;border:1px solid rgba(0,0,0,.08)}
+  .l-rojo{background:var(--rojo)}.l-naranja{background:var(--naranja)}.l-amarillo{background:var(--ambar)}.l-ok{background:var(--ok)}
+  .luces{display:inline-flex;gap:4px;vertical-align:middle}
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--borde);border-radius:var(--r);background:#fff}
+  table{border-collapse:collapse;width:100%;min-width:640px;font-size:13.5px}
+  thead th{background:var(--azul-suave);color:var(--azul);text-align:left;font-weight:700;padding:10px 12px;font-size:12px;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+  tbody td{padding:10px 12px;border-top:1px solid var(--borde);vertical-align:middle}
+  tbody tr.click{cursor:pointer}
+  tbody tr.click:hover{background:var(--azul-suave)}
+  td.r,th.r{text-align:right}
+  .bar{height:9px;border-radius:5px;background:var(--borde);overflow:hidden;margin:3px 0}
+  .bar>i{display:block;height:100%;border-radius:5px}
+  .bar .fis{background:var(--azul)}.bar .fin{background:var(--ambar)}
+  .alert-row{display:flex;gap:12px;padding:13px 15px;border-top:1px solid var(--borde);align-items:flex-start}
+  .alert-row:first-child{border-top:none}
+  .alert-row .ic{width:34px;height:34px;border-radius:9px;flex:none;display:flex;align-items:center;justify-content:center;font-size:17px}
+  .ic-rojo{background:var(--rojo-bg)}.ic-naranja{background:var(--naranja-bg)}.ic-amarillo{background:var(--amarillo-bg)}.ic-ok{background:var(--ok-bg)}
+  .alert-row .bd{flex:1;min-width:0}
+  .alert-row .bd b{font-size:14.5px}
+  .alert-row .bd p{margin:2px 0 0;color:var(--suave);font-size:13px}
+  .alert-row .meta{font-size:11.5px;color:var(--suave);margin-top:5px}
+  .seg{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px;align-items:flex-end;background:var(--bg);border-radius:10px;padding:11px}
+  .seg .field{margin:0;flex:1;min-width:120px}
+  .seg .field label{font-size:11px;margin-bottom:3px}
+  .seg select,.seg input{padding:8px 9px;font-size:13px}
+  .seg .acc{flex-basis:100%;display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:2px}
+  .est-tag{font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:999px}
+  .checklist{list-style:none;margin:0;padding:0}
+  .checklist li{display:flex;gap:11px;align-items:flex-start;padding:11px 4px;border-top:1px solid var(--borde)}
+  .checklist li:first-child{border-top:none}
+  .chk{width:24px;height:24px;border-radius:6px;flex:none;border:2px solid var(--azul);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;background:#fff;color:#fff;font-weight:700}
+  .chk.on{background:var(--ok);border-color:var(--ok)}
+  .checklist .ct{flex:1;min-width:0;font-size:14px}
+  .checklist .ct small{display:block;color:var(--suave);font-size:12px}
+  .req{color:var(--rojo);font-weight:700}
+  .ficha{border-top:1px solid var(--borde);padding:13px 4px}
+  .ficha:first-child{border-top:none}
+  .ficha .cab{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+  .ficha .cab b{font-size:14.5px}
+  .ficha .ced{font-size:12px;color:var(--suave)}
+  .mini{font-size:12.5px;color:var(--suave);margin-top:6px}
+  .mini .it{display:flex;gap:8px;align-items:center;padding:3px 0}
+  .cyberq{border-top:1px solid var(--borde);padding:12px 4px;display:flex;gap:12px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}
+  .cyberq:first-child{border-top:none}
+  .cyberq .q{flex:1;min-width:200px;font-size:14px}
+  .cyberq .q small{display:block;color:var(--suave);font-size:11.5px;margin-top:2px}
+  .cyberq select{width:auto;min-width:120px}
+  .det dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px;margin:0}
+  .det dt{color:var(--suave);font-weight:600}
+  .det dd{margin:0;font-weight:600}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .form-grid .full{grid-column:1/-1}
+  @media(max-width:520px){.form-grid{grid-template-columns:1fr}}
+  .informe{background:#fff;border:1px solid var(--borde);border-radius:var(--r);box-shadow:var(--sombra);padding:26px 24px}
+  .informe .doc-head{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;border-bottom:2px solid var(--azul);padding-bottom:14px;margin-bottom:16px}
+  .informe h3{font-size:22px;color:var(--azul)}
+  .informe .rol-line{color:var(--suave);font-size:13px}
+  .aviso-legal{background:var(--amarillo-bg);border:1px solid #EAD9A6;border-radius:10px;padding:11px 14px;font-size:12.5px;margin-bottom:16px;color:#6b5207}
+  .informe section{margin-bottom:16px}
+  .informe section h4{font-size:16px;color:var(--verde-osc);border-left:4px solid var(--verde);padding-left:9px;margin-bottom:8px}
+  .informe ul{margin:0;padding-left:20px;font-size:14px}.informe li{margin-bottom:5px}
+  .doc-foot{margin-top:20px;border-top:1px solid var(--borde);padding-top:12px;font-size:12px;color:var(--suave);display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+  .doc-foot svg{width:22px;height:22px}
+  .pay-state{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:16px;border-radius:var(--r)}
+  .pay-activa{background:var(--ok-bg)}.pay-aviso{background:var(--amarillo-bg)}.pay-cerrada{background:var(--rojo-bg)}
+  .pay-state .big{font-family:var(--f-tit);font-weight:700;font-size:24px}
+  .llave-box{background:var(--azul-suave);border-radius:var(--r);padding:16px;margin-top:14px}
+  .llave-box .kv{display:flex;justify-content:space-between;gap:10px;font-size:14px;padding:4px 0}
+  .llave-box .kv b{font-family:var(--f-tit);font-size:16px;color:var(--azul)}
+  .row-inline{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+  .row-inline .field{margin-bottom:0}
+  .bit-row{display:flex;gap:10px;padding:9px 4px;border-top:1px solid var(--borde);font-size:13px;align-items:baseline}
+  .bit-row:first-child{border-top:none}
+  .bit-row time{color:var(--suave);font-size:11.5px;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:40;background:var(--whatsapp);color:#fff;border:none;border-radius:999px;padding:12px 18px;font-weight:700;font-size:14px;box-shadow:0 6px 18px rgba(31,138,76,.4);cursor:pointer;display:flex;gap:8px;align-items:center}
+  .fab:hover{filter:brightness(1.07)}
+  /* Aviso de confirmación: azul, grande y visible (no negro pequeño) */
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:linear-gradient(135deg,var(--azul),var(--azul2));color:#fff;padding:14px 22px;border-radius:14px;font-size:15px;font-weight:700;z-index:60;box-shadow:0 10px 30px rgba(11,79,138,.4);opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;max-width:92vw;text-align:center;display:flex;gap:9px;align-items:center}
+  .toast svg{width:20px;height:20px;flex:none}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-6px)}
+  .muted{color:var(--suave)}.mt{margin-top:14px}.mb{margin-bottom:14px}
+  .addon{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--verde-osc);background:var(--verde-suave);padding:3px 9px;border-radius:999px}
+  @media(max-width:520px){.login-card h1{font-size:34px}.wrap{padding:14px 14px 84px}.view-head h2{font-size:23px}}
+  .linkbtn{background:none;border:none;color:var(--azul2);font-weight:700;cursor:pointer;padding:0;font-size:inherit;font-family:inherit;text-decoration:underline}
+  .linkbtn:hover{color:var(--azul)}
+  @media print{
+    body.imprimiendo .topbar,body.imprimiendo .side,body.imprimiendo .fab,body.imprimiendo .toast,body.imprimiendo .ovl,body.imprimiendo .no-print,body.imprimiendo .view-head{display:none!important}
+    body.imprimiendo .shell,body.imprimiendo .wrap{display:block!important;margin:0!important;padding:0!important}
+    body.imprimiendo{background:#fff}
+    body.imprimiendo .informe{box-shadow:none!important;border:none!important;margin:0!important}
+    @page{margin:14mm}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= INGRESO ================= -->
+<div id="login">
+  <div class="login-card">
+    <svg class="logo-big" viewBox="0 0 200 200" aria-hidden="true"><rect x="4" y="4" width="192" height="192" rx="46" fill="#1E3A4C"/><g stroke="#FFFFFF" stroke-linecap="round"><polygon points="100,42 150.2,71 150.2,129 100,158 49.8,129 49.8,71" fill="none" stroke-opacity=".35" stroke-width="4"/><path d="M100 100L100 42M100 100L150.2 71M100 100L150.2 129M100 100L100 158M100 100L49.8 129M100 100L49.8 71" stroke-width="6"/></g><g fill="#FFFFFF"><circle cx="150.2" cy="71" r="10"/><circle cx="150.2" cy="129" r="10"/><circle cx="100" cy="158" r="10"/><circle cx="49.8" cy="129" r="10"/><circle cx="49.8" cy="71" r="10"/></g><circle cx="100" cy="42" r="13" fill="#E0A21A"/><circle cx="100" cy="100" r="20" fill="#E0A21A"/></svg>
+    <h1>Auditor<span class="ia">-IA</span></h1>
+    <p class="tagline">Auditoría integral de contratos, proyectos, recursos y ciberseguridad. Detecta patrones y enciende alertas para que la plata no se pierda ni se desvíe.</p>
+    <div id="authBox"><div class="field" style="text-align:center;color:var(--suave)">Cargando…</div></div>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app" hidden>
+  <div class="topbar">
+    <button class="hamb" onclick="toggleMenu()" aria-label="Menú">☰</button>
+    <div class="brand"><svg viewBox="0 0 200 200" aria-hidden="true"><rect x="4" y="4" width="192" height="192" rx="46" fill="#1E3A4C"/><g stroke="#FFFFFF" stroke-linecap="round"><polygon points="100,42 150.2,71 150.2,129 100,158 49.8,129 49.8,71" fill="none" stroke-opacity=".35" stroke-width="4"/><path d="M100 100L100 42M100 100L150.2 71M100 100L150.2 129M100 100L100 158M100 100L49.8 129M100 100L49.8 71" stroke-width="6"/></g><g fill="#FFFFFF"><circle cx="150.2" cy="71" r="10"/><circle cx="150.2" cy="129" r="10"/><circle cx="100" cy="158" r="10"/><circle cx="49.8" cy="129" r="10"/><circle cx="49.8" cy="71" r="10"/></g><circle cx="100" cy="42" r="13" fill="#E0A21A"/><circle cx="100" cy="100" r="20" fill="#E0A21A"/></svg>
+      <div class="bt"><span class="s">AUDITOR</span><span class="g">-IA</span></div></div>
+    <div class="spacer"></div>
+    <div class="who"><span class="emp" id="empName">Entidad demo</span><span class="rol" id="rolName">—</span></div>
+    <button class="link-salir" onclick="salir()">Salir</button>
+  </div>
+  <div class="shell"><nav class="side" id="side"></nav><div class="wrap" id="views"></div></div>
+  <div class="ovl" onclick="toggleMenu(false)"></div>
+  <button class="fab" onclick="toast('En producción abre WhatsApp de soporte: 3044375758')"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.2 14.8l-.3-.2-2.7.7.7-2.6-.2-.3A8 8 0 0 1 12 4zm-3 4.3c.2 0 .4 0 .5.4l.7 1.6c.1.2 0 .4-.1.5l-.5.6c-.2.2-.2.3-.1.5a6 6 0 0 0 3 2.6c.2.1.3 0 .5-.1l.6-.8c.1-.2.3-.2.5-.1l1.6.8c.2.1.3.2.3.4 0 .5-.3 1.2-.9 1.4-1.6.5-3.6-.3-5.3-2s-2.5-3.7-2-5.3c.2-.6.6-.9 1-.9z"/></svg>Soporte</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+var ROLES={control:'Dirección / Control interno',ejecutor:'Ejecutor (secretaría o dependencia)',contratante:'Contratante / Ordenador del gasto',interventor:'Interventor / Supervisor',auditor:'Auditor / Control interno'};
+/* Menús por rol: cada rol ve pestañas distintas */
+var TABS_ROL={
+  control:    ['tablero','impacto','multientidad','importar','contratos','proyectos','cruces','redes','banderas','interventoria','hallazgos','denuncias','plan','cyber','vencimientos','bitacora','informe','usuarios','admin'],
+  ejecutor:   ['tablero','importar','contratos','proyectos','interventoria','hallazgos','denuncias','cyber','vencimientos','informe','usuarios','admin'],
+  contratante:['tablero','impacto','contratos','proyectos','cruces','redes','hallazgos','vencimientos','informe','usuarios','admin'],
+  interventor:['tablero','proyectos','interventoria','hallazgos','vencimientos','informe'],
+  auditor:    ['tablero','impacto','multientidad','contratos','proyectos','cruces','redes','banderas','hallazgos','denuncias','plan','cyber','vencimientos','bitacora','informe']
+};
+var ROL='control';
+var fmt=function(n){return '$'+(n).toLocaleString('es-CO');};
+var EMPRESA_DEMO={nombre:'Alcaldía ficticia (demo)',nit:'891.780.009-1',tipo:'Alcaldía',alcance:'una',numEnt:1,pagadoHasta:finDeMes(),pruebaHasta:null,moduloCiber:true,_id:null};
+var EMPRESA=JSON.parse(JSON.stringify(EMPRESA_DEMO));
+/* Estado de sesión real (Neon) */
+var ENTIDAD_ID=null, UID=null, usuarioNombre='', DEMO=false, SUPER=false;
+var hoyISO=new Date().toISOString().slice(0,10);
+function diasA(f){return Math.ceil((new Date(f+'T00:00:00')-new Date(hoyISO+'T00:00:00'))/86400000);}
+
+var contratos=[
+ {id:'C-2026-014',obj:'Construcción de polideportivo Barrio Centro',contratista:'Constructora Horizonte S.A.S.',nitCont:'900.111.222',interventor:'Laura Pérez',cedInt:'22.333.444',intAprobo:true,ordenador:'Juan Gómez — Secretario de Infraestructura',cedOrd:'7.111.222',valor:1850000000,ejecutado:1295000000,fin:'2026-11-30',poliza:true,finPoliza:'2026-10-28',otrosi:2,anticipo:740000000,antAmort:120000000,cargadoPor:'Secretaría General',fecha:'2026-09-15',doc:'Contrato_C-2026-014.pdf'},
+ {id:'C-2026-045',obj:'Pavimentación vía de acceso al polideportivo',contratista:'Constructora Horizonte S.A.S.',nitCont:'900.111.222',interventor:'Laura Pérez',cedInt:'22.333.444',intAprobo:true,ordenador:'Juan Gómez — Secretario de Infraestructura',cedOrd:'7.111.222',valor:520000000,ejecutado:390000000,fin:'2026-12-20',poliza:true,finPoliza:'2027-01-10',otrosi:1,anticipo:208000000,antAmort:40000000,cargadoPor:'Secretaría General',fecha:'2026-09-18',doc:'Contrato_C-2026-045.pdf'},
+ {id:'C-2026-021',obj:'Suministro de dotación escolar',contratista:'Distribuciones López Ltda.',nitCont:'830.222.333',interventor:'Carlos Díaz',cedInt:'15.777.888',intAprobo:true,ordenador:'Marta Ríos — Secretaria de Educación',cedOrd:'8.222.333',valor:420000000,ejecutado:420000000,fin:'2026-05-10',poliza:true,finPoliza:'2026-06-10',otrosi:0,anticipo:0,antAmort:0,cargadoPor:'Secretaría de Educación',fecha:'2026-04-02',doc:'Contrato_C-2026-021.pdf'},
+ {id:'C-2026-033',obj:'Interventoría de vías rurales',contratista:'Mario Ruiz (persona natural)',nitCont:'12.345.678',interventor:'Carlos Díaz',cedInt:'15.777.888',intAprobo:false,ordenador:'Juan Gómez — Secretario de Infraestructura',cedOrd:'7.111.222',valor:160000000,ejecutado:96000000,fin:'2026-12-01',poliza:false,finPoliza:null,otrosi:0,anticipo:0,antAmort:0,cargadoPor:'Secretaría de Infraestructura',fecha:'2026-04-05',doc:null}
+];
+var proyectos={'C-2026-014':{nombre:'Polideportivo Barrio Centro',fisico:38,financiero:70},'C-2026-045':{nombre:'Pavimentación vía de acceso',fisico:45,financiero:75},'C-2026-021':{nombre:'Dotación escolar',fisico:100,financiero:100},'C-2026-033':{nombre:'Interventoría vías rurales',fisico:55,financiero:60}};
+var checklist=[{t:'Acta de inicio firmada',d:'Contrato C-2026-014',req:true,on:true},{t:'Pólizas vigentes (cumplimiento y calidad)',d:'C-2026-033 — falta póliza',req:true,on:false},{t:'Informe de interventoría del último corte',d:'Septiembre 2026',req:true,on:true},{t:'Soportes de cada pago (facturas y actas)',d:'3 pagos sin acta parcial',req:true,on:false},{t:'Amortización del anticipo al día',d:'Anticipos entregados',req:true,on:false},{t:'Registro fotográfico del avance de obra',d:'Polideportivo',req:false,on:true}];
+var cyberQ=[
+ {q:'¿Tiene copias de respaldo automáticas y probadas de su información?',m:'CIS · Respaldo',a:'parcial'},
+ {q:'¿Usa contraseñas fuertes y segundo factor en correos y sistemas clave?',m:'CIS · Accesos',a:'no'},
+ {q:'¿Tiene antivirus/EDR actualizado en los equipos?',m:'CIS · Protección',a:'si'},
+ {q:'¿Capacita al personal contra el fraude y el phishing?',m:'ISO 27001 · Concientización',a:'no'},
+ {q:'¿Tiene política de datos personales y aviso de privacidad (Ley 1581)?',m:'Ley 1581',a:'parcial'},
+ {q:'¿Registró sus bases de datos en el RNBD de la SIC?',m:'Ley 1581',a:'no'},
+ {q:'¿Controla y retira accesos cuando alguien deja la entidad?',m:'ISO 27001 · A.9',a:'parcial'},
+ {q:'¿Sus sitios web usan HTTPS y están actualizados?',m:'Higiene técnica',a:'si'},
+ {q:'¿Tiene plan de respuesta ante un ataque o pérdida de datos?',m:'ISO 27001 · Continuidad',a:'no'},
+ {q:'¿Firma acuerdos de confidencialidad y seguridad con proveedores?',m:'Terceros',a:'parcial'}
+];
+var usuarios=[
+ {nombre:'Ricardo (demostración)',correo:'demo@skynetgenesis.com',rol:'control'},
+ {nombre:'Alcalde',correo:'alcalde@entidad.gov.co',rol:'contratante'},
+ {nombre:'Secretario de Infraestructura',correo:'infraestructura@entidad.gov.co',rol:'ejecutor'},
+ {nombre:'Interventora Laura Pérez',correo:'interventoria@entidad.gov.co',rol:'interventor'},
+ {nombre:'Jefe de Control Interno',correo:'controlinterno@entidad.gov.co',rol:'auditor'}
+];
+var seg={},bitacora=[];
+var denuncias=[],planAnual=[],evidencias=[];
+var DEMO_DENUNCIAS=[{_uuid:'d1',asunto:'Obra del polideportivo parada',detalle:'La comunidad reporta que la obra lleva dos meses sin avance, pero siguen autorizando pagos.',contrato:'C-2026-014',anonima:true,contacto:'',estado:'nueva',t:'2026-10-20'}];
+var DEMO_PLAN=[{_uuid:'p1',anio:2026,tema:'Contratación de infraestructura',riesgo:'alto',periodo:'IV trimestre',responsable:'Jefe de Control Interno',estado:'en_curso'},{_uuid:'p2',anio:2026,tema:'Manejo y amortización de anticipos',riesgo:'alto',periodo:'IV trimestre',responsable:'Control Interno',estado:'planeada'},{_uuid:'p3',anio:2027,tema:'Ciberseguridad y datos personales (Ley 1581)',riesgo:'medio',periodo:'I trimestre',responsable:'Oficina de TI',estado:'planeada'}];
+/* Copia de los datos de ejemplo para el modo demostración (cliente, sin Neon) */
+var DEMO_DATA={empresa:JSON.parse(JSON.stringify(EMPRESA_DEMO)),contratos:JSON.parse(JSON.stringify(contratos)),proyectos:JSON.parse(JSON.stringify(proyectos)),checklist:JSON.parse(JSON.stringify(checklist)),cyberQ:JSON.parse(JSON.stringify(cyberQ)),usuarios:JSON.parse(JSON.stringify(usuarios)),denuncias:JSON.parse(JSON.stringify(DEMO_DENUNCIAS)),planAnual:JSON.parse(JSON.stringify(DEMO_PLAN))};
+/* Catálogo estándar del autodiagnóstico de ciberseguridad (para entidades reales) */
+var PREGUNTAS_CYBER=cyberQ.map(function(x){return {q:x.q,m:x.m};});
+function gv(id){var el=document.getElementById(id);return el?el.value:'';}
+function guardar(){}
+function log(txt){bitacora.unshift({t:new Date().toLocaleString('es-CO'),u:(ROLES[ROL]||usuarioNombre||'Usuario'),txt:txt});if(bitacora.length>80)bitacora.pop();if(!DEMO&&window.NEON&&ENTIDAD_ID){try{window.NEON.from('bitacora').insert({entidad_id:ENTIDAD_ID,usuario:(usuarioNombre||ROLES[ROL]||''),accion:txt});}catch(e){}}}
+
+var RANK={rojo:0,naranja:1,amarillo:2,ok:3};
+var SEV={rojo:{lbl:'Crítico',cls:'rojo',em:'⛔'},naranja:{lbl:'Alto',cls:'naranja',em:'🔶'},amarillo:{lbl:'Medio',cls:'amarillo',em:'⚠️'},ok:{lbl:'En orden',cls:'ok',em:'✓'}};
+function peor(a,b){return RANK[a]<=RANK[b]?a:b;}
+function slug(s){return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,48);}
+
+function flagsDe(c){var f=[],p=proyectos[c.id];
+ if(p){var d=p.financiero-p.fisico;var s=d>=20?'rojo':d>=12?'naranja':d>=6?'amarillo':'ok';if(s!=='ok')f.push({bid:'avance',sev:s,tipo:'Avance físico vs. financiero',txt:'Pagado '+p.financiero+'% con obra en '+p.fisico+'% (desfase '+d+' pts).'});}
+ if(!c.poliza)f.push({bid:'poliza',sev:'rojo',tipo:'Póliza',txt:'Sin póliza vigente registrada; no debería estar en ejecución.'});
+ if(c.otrosi>=2)f.push({bid:'otrosi',sev:'naranja',tipo:'Modificaciones',txt:c.otrosi+' otrosí: revisar aumentos de valor o plazo.'});
+ else if(c.otrosi===1)f.push({bid:'otrosi',sev:'amarillo',tipo:'Modificaciones',txt:'1 otrosí registrado.'});
+ if(c.anticipo>0){var prop=(c.anticipo-c.antAmort)/c.anticipo;if(prop>0.5&&p&&p.fisico>40)f.push({bid:'anticipo',sev:'naranja',tipo:'Anticipo',txt:'Anticipo sin amortizar: pendiente '+fmt(c.anticipo-c.antAmort)+' con obra avanzada.'});}
+ if(c.valor>0&&c.anticipo>0&&(c.anticipo/c.valor)>0.4)f.push({bid:'anticipo_alto',sev:'naranja',tipo:'Anticipo elevado',txt:'Anticipo de '+Math.round(c.anticipo/c.valor*100)+'% del valor (el tope legal es 50%).'});
+ if(c.diasAdic>=180)f.push({bid:'plazo',sev:'amarillo',tipo:'Ampliación de plazo',txt:c.diasAdic+' días adicionados al plazo inicial: revisar la justificación.'});
+ return f;
+}
+function sevContrato(c){return flagsDe(c).reduce(function(a,x){return peor(a,x.sev);},'ok');}
+function crucesContratista(){var g={};contratos.forEach(function(c){(g[c.nitCont]=g[c.nitCont]||{nombre:c.contratista,nit:c.nitCont,items:[]}).items.push({c:c,sev:sevContrato(c)});});return Object.keys(g).map(function(k){var x=g[k];x.enAlerta=x.items.filter(function(i){return i.sev!=='ok';}).length;x.sev=x.items.reduce(function(a,i){return peor(a,i.sev);},'ok');return x;});}
+function omisionesInterventor(){var g={};contratos.forEach(function(c){(g[c.cedInt]=g[c.cedInt]||{nombre:c.interventor,ced:c.cedInt,items:[]}).items.push({c:c,sev:sevContrato(c)});});return Object.keys(g).map(function(k){var x=g[k];x.omitidos=x.items.filter(function(i){return i.c.intAprobo&&(i.sev==='rojo'||i.sev==='naranja');});return x;}).filter(function(x){return x.omitidos.length>0;});}
+function cyberPuntaje(){var v={si:0,parcial:1,no:2};var s=0;cyberQ.forEach(function(q){s+=v[q.a];});return Math.round(100-(s/(cyberQ.length*2))*100);}
+function hallazgosCyber(){var h=[];cyberQ.forEach(function(q){if(q.a==='no')h.push({bid:'cyber',sev:'rojo',tit:'Ciberseguridad — '+q.q,desc:'Control ausente ('+q.m+').',meta:q.m});else if(q.a==='parcial')h.push({bid:'cyber',sev:'amarillo',tit:'Ciberseguridad — '+q.q,desc:'Control incompleto ('+q.m+').',meta:q.m});});return h;}
+function hallazgos(){var h=[];
+ contratos.forEach(function(c){flagsDe(c).forEach(function(f){h.push({bid:f.bid,sev:f.sev,tit:f.tipo+' — '+c.id,desc:f.txt,meta:'Contratista: '+c.contratista+' · NIT '+c.nitCont+' · Ordenador: '+c.ordenador});});});
+ crucesContratista().forEach(function(x){if(x.items.length>1&&x.enAlerta>0)h.push({bid:'concentracion',sev:x.sev==='rojo'?'rojo':'naranja',tit:'Mismo contratista en varios contratos — '+x.nombre,desc:'NIT '+x.nit+' aparece en '+x.items.length+' contratos, '+x.enAlerta+' con alerta.',meta:'Contratos: '+x.items.map(function(i){return i.c.id;}).join(', ')});});
+ omisionesInterventor().forEach(function(x){h.push({bid:'interventor',sev:'rojo',tit:'Posible omisión del interventor — '+x.nombre,desc:'El interventor (CC '+x.ced+') aprobó '+x.omitidos.length+' contrato(s) pese a tener alertas.',meta:'Contratos: '+x.omitidos.map(function(i){return i.c.id;}).join(', ')});});
+ contratos.forEach(function(c){if(c.poliza&&c.finPoliza){var d=diasA(c.finPoliza);if(d>=0&&d<=30)h.push({bid:'vencimiento',sev:d<=10?'naranja':'amarillo',tit:'Póliza por vencer — '+c.id,desc:'La póliza vence el '+c.finPoliza+' ('+(d===0?'vence hoy':'en '+d+' días')+').',meta:'Contratista: '+c.contratista});}});
+ var faltan=checklist.filter(function(x){return x.req&&!x.on;}).length;
+ if(faltan>0)h.push({bid:'procesos',sev:'naranja',tit:faltan+' requisitos obligatorios sin cumplir',desc:'Documentos obligatorios pendientes (pólizas, actas o amortización).',meta:'Auditoría de procesos'});
+ hallazgosCyber().forEach(function(x){h.push(x);});
+ var fr={};contratos.forEach(function(c){if(/directa/i.test(c.modalidad||'')&&!/prestaci/i.test(c.tcont||'')){var g=fr[c.nitCont]=fr[c.nitCont]||{nombre:c.contratista,nit:c.nitCont,ids:[],total:0};g.ids.push(c.id);g.total+=c.valor;}});
+ Object.keys(fr).forEach(function(k){var x=fr[k];if(x.ids.length>=3)h.push({bid:'fraccionamiento',sev:'naranja',tit:'Posible fraccionamiento — '+x.nombre,desc:x.ids.length+' contratos por contratación directa al mismo contratista (NIT '+x.nit+'), que suman '+fmt(x.total)+'. Verificar si debió ser un solo proceso con licitación.',meta:'Contratos: '+x.ids.join(', ')});});
+ contratos.forEach(function(c){if(c.cedRep&&c.cedRep!=='—'&&(c.cedRep===c.cedInt||c.cedRep===c.cedOrd))h.push({bid:'conflicto',sev:'rojo',tit:'Posible conflicto de interés — '+c.id,desc:'La cédula del representante legal del contratista ('+c.cedRep+') coincide con la del '+(c.cedRep===c.cedInt?'interventor/supervisor':'ordenador del gasto')+'.',meta:'Contratista: '+c.contratista+' · NIT '+c.nitCont});});
+ h.forEach(function(x){x.key=slug(x.tit);});
+ h.sort(function(a,b){return RANK[a.sev]-RANK[b.sev];});
+ return h;
+}
+
+var vista='tablero';
+
+/* ===================== Conexión Neon: helpers ===================== */
+function N(){return window.NEON;}
+async function q(builder){var r=await builder;if(r&&typeof r==='object'&&('data' in r||'error' in r)){if(r.error)throw new Error((r.error&&(r.error.message||r.error.msg))||'Error de datos');return r.data;}return r;}
+async function rpc(fn,args){var r=await N().rpc(fn,args||{});if(r&&typeof r==='object'&&('data' in r||'error' in r)){if(r.error)throw new Error((r.error&&r.error.message)||'Error');return r.data;}return r;}
+function authErr(m){var el=document.getElementById('authErr');if(el)el.textContent=m||'';}
+function trad(e){var m=(e&&(e.message||e.msg))||String(e||'');if(/origin/i.test(m))return 'Dominio no autorizado todavía (configuración pendiente).';if(/(invalid|incorrect|wrong).*(credential|password|email)|credential|unauthorized|401/i.test(m))return 'Correo o contraseña incorrectos.';if(/exist|registered|already/i.test(m))return 'Ese correo ya está registrado. Inicie sesión.';if(/network|fetch|failed/i.test(m))return 'Problema de conexión. Intente de nuevo.';return m;}
+
+/* ===================== Pantallas de ingreso ===================== */
+function arranque(){
+ if(window.__arrancado)return;window.__arrancado=true;
+ pantallaLogin();
+ if(N()){N().auth.getSession().then(function(s){var u=s&&s.data&&s.data.user;if(u){DEMO=false;cargarTodo();}}).catch(function(){});}
+}
+window.arranque=arranque;
+/* Respaldo: si el SDK no cargó (sin red), igual mostramos el ingreso y la demo */
+if(document.readyState!=='loading')setTimeout(function(){arranque();},800);
+else document.addEventListener('DOMContentLoaded',function(){setTimeout(function(){arranque();},800);});
+
+function pantallaLogin(){authErr('');document.getElementById('authBox').innerHTML=
+ '<div class="field"><label for="correo">Correo</label><input id="correo" type="email" placeholder="usuario@entidad.gov.co" autocomplete="username"></div>'+
+ '<div class="field"><label for="clave">Contraseña</label><input id="clave" type="password" placeholder="Su contraseña" autocomplete="current-password" onkeydown="if(event.key===\'Enter\')ingresar()"></div>'+
+ '<p class="err" id="authErr" role="alert" style="color:var(--rojo);font-size:13px;min-height:16px;margin:2px 0;text-align:left"></p>'+
+ '<button class="btn btn-primary" onclick="ingresar()">Ingresar</button>'+
+ '<div style="display:flex;justify-content:space-between;margin-top:12px;font-size:13px">'+
+   '<button class="linkbtn" onclick="pantallaRegistro()">Crear cuenta</button>'+
+   '<button class="linkbtn" onclick="recuperar()">¿Olvidó su contraseña?</button></div>'+
+ '<div class="demo-note" style="margin-top:16px">¿Solo quiere conocerla? <button class="linkbtn" onclick="entrarDemo()">Probar la demostración</button> — datos de ejemplo de una entidad ficticia; nada es real.</div>';}
+
+function pantallaRegistro(){authErr('');document.getElementById('authBox').innerHTML=
+ '<div class="field"><label for="rNom">Nombre y apellido</label><input id="rNom" placeholder="Su nombre y apellido"></div>'+
+ '<div class="field"><label for="rEmail">Correo</label><input id="rEmail" type="email" placeholder="usuario@entidad.gov.co" autocomplete="username"></div>'+
+ '<div class="field"><label for="rPass">Contraseña (mínimo 8 caracteres)</label><input id="rPass" type="password" minlength="8" autocomplete="new-password" onkeydown="if(event.key===\'Enter\')registrar()"></div>'+
+ '<p class="err" id="authErr" role="alert" style="color:var(--rojo);font-size:13px;min-height:16px;margin:2px 0;text-align:left"></p>'+
+ '<button class="btn btn-primary" onclick="registrar()">Crear cuenta</button>'+
+ '<div class="demo-note" style="margin-top:14px">Después de crear la cuenta le pediremos el <b>código de activación</b> que le dio su entidad o SkyNet Genesis.</div>'+
+ '<div style="margin-top:10px;font-size:13px;text-align:left"><button class="linkbtn" onclick="pantallaLogin()">‹ Volver a ingresar</button></div>';}
+
+function pantallaActivar(){authErr('');document.getElementById('authBox').innerHTML=
+ '<p class="tagline" style="margin:0 0 14px">Su cuenta ya existe. Escriba el <b>código de activación</b> para vincularla a su entidad.</p>'+
+ '<div class="field"><label for="aCod">Código de activación</label><input id="aCod" placeholder="Ej. 3F9A2C7B" style="text-transform:uppercase" onkeydown="if(event.key===\'Enter\')activar()"></div>'+
+ '<p class="err" id="authErr" role="alert" style="color:var(--rojo);font-size:13px;min-height:16px;margin:2px 0;text-align:left"></p>'+
+ '<button class="btn btn-primary" onclick="activar()">Activar y entrar</button>'+
+ '<div style="margin-top:12px;font-size:13px;text-align:left"><button class="linkbtn" onclick="salir()">Salir</button></div>';}
+
+async function ingresar(){authErr('');var email=(gv('correo')||'').trim(),pass=gv('clave');if(!email||!pass){authErr('Escriba correo y contraseña.');return;}
+ var b=event&&event.target&&event.target.tagName==='BUTTON'?event.target:null;if(b){b.disabled=true;b.textContent='Ingresando…';}
+ try{var r=await N().auth.signIn.email({email:email,password:pass});if(r&&r.error){authErr(trad(r.error));if(b){b.disabled=false;b.textContent='Ingresar';}return;}DEMO=false;await cargarTodo();}
+ catch(e){authErr(trad(e));if(b){b.disabled=false;b.textContent='Ingresar';}}}
+
+async function registrar(){authErr('');var n=(gv('rNom')||'').trim(),email=(gv('rEmail')||'').trim(),pass=gv('rPass');
+ if(!n||n.trim().split(/\s+/).length<2){authErr('Escriba su nombre y apellido.');return;}
+ if(!email||pass.length<8){authErr('Correo válido y contraseña de mínimo 8 caracteres.');return;}
+ var b=event&&event.target&&event.target.tagName==='BUTTON'?event.target:null;if(b){b.disabled=true;b.textContent='Creando…';}
+ try{var r=await N().auth.signUp.email({name:n,email:email,password:pass});if(r&&r.error){authErr(trad(r.error));if(b){b.disabled=false;b.textContent='Crear cuenta';}return;}usuarioNombre=n;pantallaActivar();}
+ catch(e){authErr(trad(e));if(b){b.disabled=false;b.textContent='Crear cuenta';}}}
+
+async function activar(){authErr('');var cod=(gv('aCod')||'').trim();if(!cod){authErr('Escriba el código.');return;}
+ var b=event&&event.target&&event.target.tagName==='BUTTON'?event.target:null;if(b){b.disabled=true;b.textContent='Activando…';}
+ try{var res=await rpc('activar_cuenta',{p_codigo:cod,p_nombre:usuarioNombre||null});if(!res||!res.ok){authErr((res&&res.error)||'No se pudo activar el código.');if(b){b.disabled=false;b.textContent='Activar y entrar';}return;}DEMO=false;await cargarTodo();}
+ catch(e){authErr(trad(e));if(b){b.disabled=false;b.textContent='Activar y entrar';}}}
+
+function recuperar(){var email=(gv('correo')||'').trim();toast(email?('Si '+email+' está registrado, le llegará un enlace. (Se habilita en producción.)'):'Escriba su correo arriba para enviarle el enlace.');}
+
+/* ===================== Demo (cliente, sin Neon) ===================== */
+function entrarDemo(){DEMO=true;SUPER=false;ROL='control';usuarioNombre='Demostración';ENTIDAD_ID=null;
+ EMPRESA=JSON.parse(JSON.stringify(DEMO_DATA.empresa));
+ contratos=JSON.parse(JSON.stringify(DEMO_DATA.contratos));
+ proyectos=JSON.parse(JSON.stringify(DEMO_DATA.proyectos));
+ checklist=JSON.parse(JSON.stringify(DEMO_DATA.checklist));
+ cyberQ=JSON.parse(JSON.stringify(DEMO_DATA.cyberQ));
+ usuarios=JSON.parse(JSON.stringify(DEMO_DATA.usuarios));
+ denuncias=JSON.parse(JSON.stringify(DEMO_DATA.denuncias));planAnual=JSON.parse(JSON.stringify(DEMO_DATA.planAnual));evidencias=[];
+ seg={};bitacora=[];abrirApp();}
+
+/* ===================== Carga real desde Neon ===================== */
+function mapContrato(r){return {id:r.codigo,_uuid:r.id,obj:r.objeto,contratista:r.contratista,nitCont:r.nit_contratista||'—',interventor:r.interventor||'—',cedInt:r.ced_interventor||'—',intAprobo:!!r.int_aprobo,ordenador:r.ordenador||'—',cedOrd:r.ced_ordenador||'—',valor:+r.valor||0,ejecutado:+r.ejecutado||0,fin:r.fin||null,poliza:!!r.tiene_poliza,finPoliza:r.fin_poliza||null,otrosi:r.otrosi||0,anticipo:+r.anticipo||0,antAmort:+r.anticipo_amort||0,modalidad:r.modalidad||'',tcont:r.tipo||'',estado:r.estado||'',urlSecop:r.url_secop||'',repLegal:r.rep_legal||'',cedRep:r.ced_rep_legal||'',fuente:r.fuente||'manual',idSecop:r.id_secop||'',diasAdic:+r.dias_adic||0,cargadoPor:(r.fuente==='secop'?'SECOP II':(r.fuente==='csv'?'Importación':'Entidad')),fecha:(r.creado||'').slice(0,10),doc:(r.url_secop?'Expediente SECOP':null)};}
+
+async function cargarTodo(){try{
+ var s=await N().auth.getSession();var u=s&&s.data&&s.data.user;if(!u){pantallaLogin();return;}
+ UID=u.id;usuarioNombre=(u.name||u.email||'');
+ SUPER=false;try{SUPER=!!(await rpc('soy_superadmin'));}catch(e){}
+ var mem=await q(N().from('usuario_entidad').select('*'));mem=mem||[];
+ if(!mem.length&&!SUPER){pantallaActivar();return;}
+ if(!mem.length&&SUPER){ROL='control';EMPRESA={nombre:'SkyNet Genesis (superadmin)',nit:'',tipo:'Otra',alcance:'una',numEnt:1,pagadoHasta:null,pruebaHasta:null,moduloCiber:true,_id:null};ENTIDAD_ID=null;contratos=[];proyectos={};checklist=[];cyberQ=PREGUNTAS_CYBER.map(function(p){return {q:p.q,m:p.m,a:'no',_uuid:null};});usuarios=[];seg={};bitacora=[];abrirApp();return;}
+ var m=mem[0];ENTIDAD_ID=m.entidad_id;ROL=m.rol||'ejecutor';
+ var ents=await q(N().from('entidad').select('*').eq('id',ENTIDAD_ID));var e=(ents&&ents[0])||{};
+ EMPRESA={nombre:e.nombre||'',nit:e.nit||'',tipo:e.tipo||'Alcaldía',alcance:'una',numEnt:1,pagadoHasta:e.pagado_hasta||null,pruebaHasta:e.prueba_hasta||null,moduloCiber:!!e.modulo_ciber,plan:e.plan||'basico',_id:ENTIDAD_ID};
+ await cargarDatos();abrirApp();
+}catch(err){console.error(err);authErr(trad(err));pantallaLogin();}}
+
+async function cargarDatos(){
+ contratos=[];proyectos={};checklist=[];seg={};usuarios=[];bitacora=[];denuncias=[];planAnual=[];evidencias=[];cyberQ=PREGUNTAS_CYBER.map(function(p){return {q:p.q,m:p.m,a:'no',_uuid:null};});
+ try{var cs=await q(N().from('contrato').select('*').eq('entidad_id',ENTIDAD_ID).order('creado'));contratos=(cs||[]).map(mapContrato);}catch(e){console.warn('contratos',e);}
+ try{var ps=await q(N().from('proyecto').select('*').eq('entidad_id',ENTIDAD_ID));var byUuid={};contratos.forEach(function(c){byUuid[c._uuid]=c.id;});(ps||[]).forEach(function(p){var key=(p.contrato_id&&byUuid[p.contrato_id])?byUuid[p.contrato_id]:('P-'+String(p.id).slice(0,6));proyectos[key]={nombre:p.nombre,fisico:p.fisico,financiero:p.financiero,_uuid:p.id,presupuesto:p.presupuesto};});}catch(e){console.warn('proyectos',e);}
+ try{var rs=await q(N().from('requisito').select('*').eq('entidad_id',ENTIDAD_ID));checklist=(rs||[]).map(function(r){return {t:r.titulo,d:r.detalle||'',req:r.obligatorio,on:r.cumplido,_uuid:r.id};});if(!checklist.length&&ROL==='control'){await sembrarRequisitos();}}catch(e){console.warn('requisitos',e);}
+ try{var cy=await q(N().from('cyber_respuesta').select('*').eq('entidad_id',ENTIDAD_ID));var guard={};(cy||[]).forEach(function(r){guard[r.pregunta]={a:r.respuesta,_uuid:r.id};});cyberQ=PREGUNTAS_CYBER.map(function(p){var g=guard[p.q]||{};return {q:p.q,m:p.m,a:g.a||'no',_uuid:g._uuid||null};});}catch(e){console.warn('cyber',e);}
+ try{var hs=await q(N().from('hallazgo_seg').select('*').eq('entidad_id',ENTIDAD_ID));(hs||[]).forEach(function(r){seg[r.clave]={estado:r.estado,resp:r.responsable||'',fecha:r.fecha_limite||'',nota:r.nota||'',por:'',_uuid:r.id};});}catch(e){console.warn('hallazgos',e);}
+ try{var us=await q(N().from('usuario_entidad').select('*').eq('entidad_id',ENTIDAD_ID));usuarios=(us||[]).map(function(r){return {nombre:r.nombre||'(sin nombre)',correo:(r.user_id===UID?usuarioNombre:'—'),rol:r.rol,user_id:r.user_id};});}catch(e){console.warn('usuarios',e);}
+ try{var bs=await q(N().from('bitacora').select('*').eq('entidad_id',ENTIDAD_ID).order('creado'));bitacora=(bs||[]).slice(-80).reverse().map(function(r){return {t:new Date(r.creado).toLocaleString('es-CO'),u:r.usuario||'',txt:r.accion};});}catch(e){console.warn('bitacora',e);}
+ try{var dn=await q(N().from('denuncia').select('*').eq('entidad_id',ENTIDAD_ID).order('creado'));denuncias=(dn||[]).reverse().map(function(r){return {_uuid:r.id,asunto:r.asunto,detalle:r.detalle||'',contrato:r.contrato||'',anonima:!!r.anonima,contacto:r.contacto||'',estado:r.estado,t:(r.creado||'').slice(0,10)};});}catch(e){console.warn('denuncias',e);}
+ try{var pl=await q(N().from('plan_auditoria').select('*').eq('entidad_id',ENTIDAD_ID).order('creado'));planAnual=(pl||[]).map(function(r){return {_uuid:r.id,anio:r.anio,tema:r.tema,riesgo:r.riesgo,periodo:r.periodo||'',responsable:r.responsable||'',estado:r.estado};});}catch(e){console.warn('plan',e);}
+ try{var ev=await q(N().from('evidencia').select('*').eq('entidad_id',ENTIDAD_ID).order('creado'));evidencias=(ev||[]).map(function(r){return {_uuid:r.id,ambito:r.ambito,ref:r.ref,descripcion:r.descripcion,url:r.url||'',t:(r.creado||'').slice(0,10)};});}catch(e){console.warn('evidencia',e);}
+}
+
+var REQUISITOS_STD=[['Acta de inicio firmada','De cada contrato en ejecución',true],['Pólizas vigentes (cumplimiento y calidad)','Todas las garantías al día',true],['Informe de interventoría del último corte','Periódico',true],['Soportes de cada pago (facturas y actas)','Para autorizar pagos',true],['Amortización del anticipo al día','Cuando hay anticipos',true],['Registro fotográfico del avance de obra','Obras físicas',false]];
+async function sembrarRequisitos(){try{var filas=REQUISITOS_STD.map(function(r){return {entidad_id:ENTIDAD_ID,titulo:r[0],detalle:r[1],obligatorio:r[2],cumplido:false};});var ins=await q(N().from('requisito').insert(filas).select());checklist=(ins||[]).map(function(r){return {t:r.titulo,d:r.detalle||'',req:r.obligatorio,on:r.cumplido,_uuid:r.id};});}catch(e){}}
+
+function abrirApp(){document.getElementById('login').hidden=true;document.getElementById('app').hidden=false;document.getElementById('empName').textContent=EMPRESA.nombre||'—';document.getElementById('rolName').textContent=ROLES[ROL]||ROL;log('Ingreso como '+(ROLES[ROL]||ROL));pintarMenu();ir('tablero');window.scrollTo(0,0);}
+
+async function salir(){try{if(!DEMO&&N())await N().auth.signOut();}catch(e){}DEMO=false;ENTIDAD_ID=null;UID=null;document.getElementById('app').hidden=true;document.getElementById('login').hidden=false;pantallaLogin();window.scrollTo(0,0);}
+var TABNOM={tablero:'Tablero',impacto:'Impacto',multientidad:'Multientidad',importar:'Importar datos',contratos:'Contratos',proyectos:'Proyectos',cruces:'Cruces',redes:'Beneficiario final',banderas:'Banderas rojas',interventoria:'Interventoría',hallazgos:'Hallazgos',denuncias:'Denuncias',plan:'Plan de auditoría',cyber:'Ciberseguridad',vencimientos:'Vencimientos',bitacora:'Bitácora',informe:'Informe',usuarios:'Usuarios',admin:'Parametrización y cobro'};
+var SECCIONES=[{t:'Resumen',items:['tablero','impacto','multientidad']},{t:'Datos',items:['importar']},{t:'Vigilancia',items:['contratos','proyectos','cruces','redes','banderas','interventoria','vencimientos']},{t:'Control interno',items:['hallazgos','denuncias','plan','informe','bitacora']},{t:'Seguridad',items:['cyber']},{t:'Configuración',items:['usuarios','admin']}];
+var ICON={tablero:'📊',impacto:'🎯',multientidad:'🏛️',importar:'📥',contratos:'📄',proyectos:'📈',cruces:'🔗',redes:'🕸️',banderas:'🚩',interventoria:'✅',hallazgos:'⚠️',denuncias:'📣',plan:'🗂️',cyber:'🛡️',vencimientos:'⏰',informe:'📑',bitacora:'🕑',usuarios:'👥',admin:'⚙️'};
+function tabsPermitidas(){return TABS_ROL[ROL]||['tablero'];}
+function pintarMenu(){var cont=document.getElementById('side');cont.innerHTML='';var perm=tabsPermitidas();SECCIONES.forEach(function(s){var items=s.items.filter(function(id){return perm.indexOf(id)>=0;});if(!items.length)return;var g=document.createElement('div');g.className='grp';g.textContent=s.t;cont.appendChild(g);items.forEach(function(id){var b=document.createElement('button');b.className='item'+(id===vista?' active':'');b.id='nav-'+id;b.innerHTML='<span class="ico">'+(ICON[id]||'•')+'</span><span>'+TABNOM[id]+'</span>';b.onclick=function(){ir(id);};cont.appendChild(b);});});}
+function toggleMenu(force){var on=(typeof force==='boolean')?force:!document.body.classList.contains('menu');document.body.classList.toggle('menu',on);}
+function ir(id){if(tabsPermitidas().indexOf(id)<0)id='tablero';vista=id;contratoVista='lista';document.querySelectorAll('.side .item').forEach(function(t){t.classList.remove('active');});var a=document.getElementById('nav-'+id);if(a)a.classList.add('active');document.getElementById('views').innerHTML=RENDER[id]();toggleMenu(false);window.scrollTo({top:0,behavior:'smooth'});}
+
+var RENDER={};
+function luces(sev){return '<span class="luces"><span class="luz l-rojo" style="opacity:'+(sev==='rojo'?1:.18)+'"></span><span class="luz l-naranja" style="opacity:'+(sev==='naranja'?1:.18)+'"></span><span class="luz l-amarillo" style="opacity:'+(sev==='amarillo'?1:.18)+'"></span><span class="luz l-ok" style="opacity:'+(sev==='ok'?1:.18)+'"></span></span>';}
+function chip(sev){return '<span class="badge b-'+SEV[sev].cls+'">'+SEV[sev].em+' '+SEV[sev].lbl+'</span>';}
+function kpi(t,v,l,s){return '<div class="card kpi '+t+'"><div class="lbl">'+l+'</div><div class="val num">'+v+'</div><div class="sub">'+s+'</div></div>';}
+function fuente(txt){return '<div class="fuente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg><div>'+txt+'</div></div>';}
+
+RENDER.tablero=function(){
+ var h=hallazgos();var nR=h.filter(function(x){return x.sev==='rojo';}).length,nN=h.filter(function(x){return x.sev==='naranja';}).length,nA=h.filter(function(x){return x.sev==='amarillo';}).length;
+ var cerrados=h.filter(function(x){return seg[x.key]&&seg[x.key].estado==='cerrado';}).length;
+ var riesgo=0;contratos.forEach(function(c){var p=proyectos[c.id];if(p){var d=p.financiero-p.fisico;if(d>=12)riesgo+=Math.round(c.valor*d/100);}});
+ var peorG=h.length?h[0].sev:'ok';
+ var sm={rojo:{c:'sem-rojo',t:'Riesgo crítico',p:'Hay hallazgos críticos que exigen verificación inmediata.'},naranja:{c:'sem-naranja',t:'Riesgo alto',p:'Hay alertas altas por confirmar antes del próximo pago.'},amarillo:{c:'sem-amarillo',t:'Riesgo medio',p:'Hay señales por vigilar.'},ok:{c:'sem-ok',t:'En orden',p:'No hay hallazgos abiertos.'}}[peorG];
+ var score=Math.max(0,100-nR*16-nN*8-nA*3);
+ var top=h.slice(0,4).map(function(x){return '<div class="alert-row"><div class="ic ic-'+SEV[x.sev].cls+'">'+SEV[x.sev].em+'</div><div class="bd"><b>'+x.tit+'</b><p>'+x.desc+'</p><div class="meta">'+x.meta+'</div></div></div>';}).join('')||'<div class="alert-row"><div class="ic ic-ok">✓</div><div class="bd"><b>Sin alertas</b></div></div>';
+ return '<div class="view-head"><div><h2>Tablero de control</h2><p>Estado de contratos, proyectos, recursos y seguridad. Las alertas son señales para verificar, no acusaciones.</p></div><span class="badge b-info">Rol: '+ROLES[ROL]+'</span></div>'+
+ fuente('Todo lo que ve aquí se <b>calcula solo</b> a partir de los datos que la entidad cargó a mano en Contratos, Proyectos e Interventoría. Auditor-IA no inventa datos: solo cruza y señala.')+
+ '<div class="card panel mb"><div class="semaforo"><div class="sem-circle '+sm.c+'">'+score+'</div><div class="sem-txt"><b>'+sm.t+'</b><p>'+sm.p+' Índice de seguridad de recursos: '+score+'/100 · Ciberseguridad: '+cyberPuntaje()+'/100.</p></div></div></div>'+
+ '<div class="grid kpis mb">'+kpi('azul',contratos.length,'Contratos vigilados',fmt(contratos.reduce(function(s,c){return s+c.valor;},0)))+kpi(nR?'s-rojo':'s-ok',nR,'Alertas rojas','Críticas, verificar ya')+kpi(nN?'s-naranja':'s-ok',nN,'Alertas naranjas','Altas por confirmar')+kpi(riesgo?'s-rojo':'s-ok',riesgo?fmt(riesgo):'$0','Recursos en riesgo','Pagado sobre el avance')+'</div>'+
+ '<div class="card mb"><div class="panel"><h3>Alertas prioritarias</h3><div class="sub">Lo que más amenaza los recursos ahora mismo.</div></div>'+top+(h.length>4?'<div class="alert-row"><div class="bd"><button class="btn btn-ghost btn-sm" onclick="ir(\'hallazgos\')">Ver y gestionar los '+h.length+' hallazgos</button></div></div>':'')+'</div>'+
+ '<div class="card panel"><h3>Leyenda del semáforo</h3><div class="sub">Cuatro niveles. '+cerrados+' hallazgo(s) ya cerrados con seguimiento.</div><div style="display:flex;gap:10px;flex-wrap:wrap">'+chip('rojo')+chip('naranja')+chip('amarillo')+chip('ok')+'</div></div>';
+};
+
+/* ---------- CONTRATOS: lista / detalle / registrar ---------- */
+var contratoVista='lista',contratoSel=null;
+RENDER.contratos=function(){
+ if(contratoVista==='detalle')return detalleContrato();
+ if(contratoVista==='form')return formContrato();
+ var rows=contratos.map(function(c){var s=sevContrato(c);var pct=Math.round(c.ejecutado/c.valor*100);return '<tr class="click" onclick="verContrato(\''+c.id+'\')"><td>'+luces(s)+' <b>'+esc(c.id)+'</b><br><small class="muted">'+esc(c.obj)+'</small></td><td>'+esc(c.contratista)+'<br><small class="muted">NIT/CC '+esc(c.nitCont)+'</small></td><td class="r num">'+fmt(c.valor)+'<br><small class="muted">'+pct+'% ejecutado</small></td><td>'+(c.poliza?'<span class="badge b-ok">Sí</span>':'<span class="badge b-rojo">Falta</span>')+'</td><td>'+chip(s)+'</td><td><span class="muted">Abrir ›</span></td></tr>';}).join('');
+ return '<div class="view-head"><div><h2>Contratos</h2><p>Toque un contrato para abrirlo y ver todo su detalle.</p></div><button class="btn btn-verde btn-sm" onclick="contratoVista=\'form\';repintar()">+ Registrar contrato</button></div>'+
+  fuente('Estos contratos los <b>carga la entidad a mano</b> (en esta demostración son de ejemplo). En cada contrato verá quién lo cargó y cuándo. Las luces de color las pone Auditor-IA solo, según esos datos.')+
+  '<div class="tbl-wrap"><table><thead><tr><th>Contrato</th><th>Contratista</th><th class="r">Valor</th><th>Póliza</th><th>Semáforo</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+};
+function verContrato(id){contratoSel=id;contratoVista='detalle';repintar();}
+function detalleContrato(){
+ var c=contratos.find(function(x){return x.id===contratoSel;});if(!c)return RENDER.contratos();
+ var p=proyectos[c.id];var fl=flagsDe(c);
+ var alertas=fl.length?fl.map(function(f){return '<div class="alert-row"><div class="ic ic-'+SEV[f.sev].cls+'">'+SEV[f.sev].em+'</div><div class="bd"><b>'+f.tipo+'</b><p>'+f.txt+'</p></div></div>';}).join(''):'<div class="alert-row"><div class="ic ic-ok">✓</div><div class="bd"><b>Sin alertas en este contrato</b></div></div>';
+ return '<div class="view-head"><div><h2>'+esc(c.id)+'</h2><p>'+esc(c.obj)+'</p></div><button class="btn btn-ghost btn-sm" onclick="contratoVista=\'lista\';repintar()">‹ Volver a contratos</button></div>'+
+  '<div class="card panel det mb"><dl>'+
+   '<dt>Contratista</dt><dd>'+esc(c.contratista)+'</dd><dt>NIT / Cédula</dt><dd>'+esc(c.nitCont)+'</dd>'+
+   '<dt>Ordenador del gasto</dt><dd>'+esc(c.ordenador)+'</dd><dt>Interventor</dt><dd>'+esc(c.interventor)+' (CC '+esc(c.cedInt)+')</dd>'+
+   '<dt>Valor</dt><dd>'+fmt(c.valor)+'</dd><dt>Ejecutado</dt><dd>'+fmt(c.ejecutado)+' ('+Math.round(c.ejecutado/c.valor*100)+'%)</dd>'+
+   '<dt>Vence</dt><dd>'+(c.fin||'—')+'</dd><dt>Póliza</dt><dd>'+(c.poliza?('Sí, vence '+(c.finPoliza||'—')):'FALTA')+'</dd>'+
+   '<dt>Otrosí</dt><dd>'+c.otrosi+'</dd><dt>Anticipo</dt><dd>'+(c.anticipo?fmt(c.anticipo)+' (amortizado '+fmt(c.antAmort)+')':'Sin anticipo')+'</dd>'+
+   ((c.modalidad||c.tcont)?'<dt>Modalidad</dt><dd>'+esc(c.modalidad||'—')+'</dd><dt>Tipo</dt><dd>'+esc(c.tcont||'—')+'</dd>':'')+
+   (c.repLegal&&c.repLegal!=='—'?'<dt>Representante legal</dt><dd>'+esc(c.repLegal)+(c.cedRep&&c.cedRep!=='—'?' (CC '+esc(c.cedRep)+')':'')+'</dd>':'')+
+  '</dl>'+
+  '<div class="fuente mt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg><div>Cargado por <b>'+esc(c.cargadoPor)+'</b>'+(c.fecha?' el '+c.fecha:'')+'. '+(c.urlSecop?('Expediente: <a href="'+esc(c.urlSecop)+'" target="_blank" rel="noopener"><b>ver en SECOP</b></a>'):(c.doc?('Documento: <b>'+esc(c.doc)+'</b>'):'<span class="muted">sin documento adjunto</span>'))+'</div></div>'+
+  (p?'<div class="mt"><div style="font-size:12px;color:var(--suave);font-weight:700">AVANCE FÍSICO '+p.fisico+'% · FINANCIERO '+p.financiero+'%</div><div class="bar"><i class="fis" style="width:'+p.fisico+'%"></i></div><div class="bar"><i class="fin" style="width:'+p.financiero+'%"></i></div></div>':'')+
+  '</div>'+
+  '<div class="card mb"><div class="panel"><h3>Alertas de este contrato</h3></div>'+alertas+'</div>'+
+  evidenciaCard('contrato',c.id);
+}
+function formContrato(){
+ return '<div class="view-head"><div><h2>Registrar contrato</h2><p>Carga manual. Los campos con * son obligatorios.</p></div><button class="btn btn-ghost btn-sm" onclick="contratoVista=\'lista\';repintar()">‹ Cancelar</button></div>'+
+  '<div class="card panel"><div class="form-grid">'+
+   '<div class="field"><label>Código del contrato *</label><input id="f_id" placeholder="C-2026-050"></div>'+
+   '<div class="field"><label>Valor (COP) *</label><input id="f_valor" type="number" placeholder="150000000"></div>'+
+   '<div class="field full"><label>Objeto *</label><input id="f_obj" placeholder="Objeto del contrato"></div>'+
+   '<div class="field"><label>Contratista *</label><input id="f_contratista" placeholder="Nombre o razón social"></div>'+
+   '<div class="field"><label>NIT / Cédula del contratista</label><input id="f_nit" placeholder="900.000.000"></div>'+
+   '<div class="field"><label>Ordenador del gasto</label><input id="f_ord" placeholder="Nombre y cargo"></div>'+
+   '<div class="field"><label>Interventor</label><input id="f_int" placeholder="Nombre"></div>'+
+   '<div class="field"><label>Fecha de terminación</label><input id="f_fin" type="date"></div>'+
+   '<div class="field"><label>¿Tiene póliza vigente?</label><select id="f_pol"><option value="si">Sí</option><option value="no">No</option></select></div>'+
+   '<div class="field full"><label>Avance físico % / financiero % (si aplica)</label><div class="row-inline"><input id="f_fis" type="number" placeholder="Físico %" style="max-width:140px"><input id="f_finp" type="number" placeholder="Financiero %" style="max-width:140px"></div></div>'+
+  '</div><div class="mt"><button class="btn btn-verde" onclick="agregarContrato()">Guardar contrato</button></div>'+
+  '<p class="muted mt" style="font-size:12px">Al guardar, el contrato entra a la lista y Auditor-IA calcula sus alertas de inmediato.</p></div>';
+}
+function agregarContrato(){
+ var id=(document.getElementById('f_id').value||'').trim();var obj=(document.getElementById('f_obj').value||'').trim();var cont=(document.getElementById('f_contratista').value||'').trim();var valor=parseFloat(document.getElementById('f_valor').value||'0');
+ if(!id||!obj||!cont||!valor){toast('Complete código, objeto, contratista y valor.');return;}
+ var fis=parseInt(document.getElementById('f_fis').value||'0'),finp=parseInt(document.getElementById('f_finp').value||'0');
+ var c={id:id,obj:obj,contratista:cont,nitCont:(document.getElementById('f_nit').value||'—').trim(),interventor:(document.getElementById('f_int').value||'—').trim(),cedInt:'—',intAprobo:false,ordenador:(document.getElementById('f_ord').value||'—').trim(),cedOrd:'—',valor:valor,ejecutado:Math.round(valor*finp/100),fin:document.getElementById('f_fin').value||null,poliza:document.getElementById('f_pol').value==='si',finPoliza:null,otrosi:0,anticipo:0,antAmort:0,cargadoPor:ROLES[ROL],fecha:hoyISO,doc:null};
+ contratos.push(c);if(fis||finp)proyectos[id]={nombre:obj,fisico:fis,financiero:finp};
+ log('Registró el contrato '+id);toast('✓ Contrato '+id+' registrado y analizado.');contratoVista='lista';repintar();
+}
+function repintar(){document.getElementById('views').innerHTML=RENDER[vista]();window.scrollTo({top:0,behavior:'smooth'});}
+
+RENDER.proyectos=function(){
+ return '<div class="view-head"><div><h2>Avance de proyectos</h2><p>Avance físico (obra real) contra avance financiero (lo pagado). La alarma central contra el desvío de recursos.</p></div></div>'+
+  fuente('El <b>avance físico</b> lo registra la interventoría y el <b>avance financiero</b> sale de los pagos. El <b>desfase</b> es una resta simple: financiero − físico. Si es alto, significa que se pagó más de lo construido.')+
+  contratos.map(function(c){var p=proyectos[c.id];if(!p)return '';var d=p.financiero-p.fisico;var s=d>=20?'rojo':d>=12?'naranja':d>=6?'amarillo':'ok';var enR=d>=12?Math.round(c.valor*d/100):0;return '<div class="card panel mb"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap"><div><h3>'+p.nombre+'</h3><div class="sub">'+c.id+' · Presupuesto '+fmt(c.valor)+' · '+c.contratista+'</div></div>'+chip(s)+'</div><div class="mt"><div style="font-size:12px;color:var(--suave);font-weight:700">AVANCE FÍSICO (obra real)</div><div class="bar"><i class="fis" style="width:'+p.fisico+'%"></i></div><div class="num" style="font-size:12px">'+p.fisico+'%</div>'+efis(c.id,p.fisico)+'</div><div class="mt"><div style="font-size:12px;color:var(--suave);font-weight:700">AVANCE FINANCIERO (ya pagado)</div><div class="bar"><i class="fin" style="width:'+p.financiero+'%"></i></div><div class="num" style="font-size:12px">'+p.financiero+'%</div></div><div class="mt" style="background:var(--'+SEV[s].cls+'-bg);border-radius:10px;padding:10px 13px;font-size:13.5px">'+SEV[s].em+' Desfase = '+p.financiero+'% − '+p.fisico+'% = <b>'+d+' puntos</b>.'+(enR?' Recursos en riesgo: <b>'+fmt(enR)+'</b>.':' Pago y obra en línea.')+'</div></div>';}).join('');
+};
+
+RENDER.cruces=function(){
+ var fichasC=crucesContratista().map(function(x){return '<div class="ficha"><div class="cab"><div><b>'+x.nombre+'</b><div class="ced">NIT/CC '+x.nit+' · '+x.items.length+' contrato(s)</div></div>'+chip(x.sev)+'</div><div class="mini">'+x.items.map(function(i){return '<div class="it">'+luces(i.sev)+' '+i.c.id+' — '+i.c.obj+'</div>';}).join('')+'</div>'+(x.items.length>1&&x.enAlerta>0?'<div class="mini" style="color:var(--rojo);font-weight:600;margin-top:6px">⚠️ Misma cédula en varios contratos y '+x.enAlerta+' con alerta: revisar todos sus contratos.</div>':'')+'</div>';}).join('');
+ var oi=omisionesInterventor();var fichasI=oi.length?oi.map(function(x){return '<div class="ficha"><div class="cab"><div><b>'+x.nombre+'</b><div class="ced">Interventor · CC '+x.ced+'</div></div><span class="badge b-rojo">⛔ Posible omisión</span></div><div class="mini">Aprobó pese a alertas: '+x.omitidos.map(function(i){return i.c.id;}).join(', ')+'</div></div>';}).join(''):'<div class="ficha muted">Ningún interventor con omisiones detectadas.</div>';
+ return '<div class="view-head"><div><h2>Cruces de información</h2><p>Relaciona cédulas, NIT, contratistas e interventores entre todos los contratos.</p></div></div>'+
+  fuente('Los cruces se arman <b>solos</b> comparando el NIT/cédula que la entidad escribió en cada contrato. No consultan fuentes externas en esta demostración.')+
+  '<div class="card mb"><div class="panel"><h3>Por contratista / beneficiario</h3><div class="sub">Un mismo NIT o cédula en varios contratos.</div></div><div style="padding:0 16px 10px">'+fichasC+'</div></div><div class="card"><div class="panel"><h3>Vigilancia del vigilante</h3><div class="sub">Interventores que aprobaron contratos pese a tener alertas.</div></div><div style="padding:0 16px 10px">'+fichasI+'</div></div>';
+};
+
+RENDER.banderas=function(){
+ var h=hallazgos();var cuenta={};h.forEach(function(x){cuenta[x.bid]=(cuenta[x.bid]||0)+1;});
+ var cat=[{bid:'avance',n:'Pago por encima del avance físico',d:'El avance financiero supera al físico: posible pago de obra no ejecutada.'},{bid:'poliza',n:'Contrato sin póliza vigente',d:'Ejecución sin garantía que ampare los recursos.'},{bid:'otrosi',n:'Exceso de modificaciones (otrosí)',d:'Aumentos repetidos de valor o plazo que pueden encubrir sobrecostos.'},{bid:'plazo',n:'Ampliación grande de plazo',d:'Muchos días adicionados al plazo inicial (dato de SECOP).'},{bid:'anticipo',n:'Anticipo sin amortizar',d:'Dinero entregado por adelantado que no se descuenta al ritmo de la obra.'},{bid:'anticipo_alto',n:'Anticipo elevado (>40%)',d:'Anticipo cercano al tope legal del 50% del valor del contrato.'},{bid:'fraccionamiento',n:'Posible fraccionamiento',d:'Varios contratos por contratación directa al mismo contratista para evitar la licitación.'},{bid:'conflicto',n:'Conflicto de interés',d:'El representante legal del contratista coincide con el interventor o el ordenador del gasto.'},{bid:'concentracion',n:'Concentración en un mismo contratista',d:'Mismo NIT/cédula en varios contratos: posible direccionamiento.'},{bid:'interventor',n:'Interventor que aprueba pese a alertas',d:'El control que no controla; posible complicidad.'},{bid:'vencimiento',n:'Pólizas o plazos por vencer',d:'Garantías o contratos próximos a vencer sin renovar.'},{bid:'procesos',n:'Requisitos de interventoría incumplidos',d:'Faltan soportes obligatorios para seguir pagando.'},{bid:'cyber',n:'Debilidades de ciberseguridad',d:'Controles de información ausentes o incompletos (ISO/CIS/Ley 1581).'},{bid:'ofertaunica',n:'Adjudicación con oferente único',d:'Requiere el dataset de procesos de SECOP (número de oferentes). En la hoja de ruta.',req:true}];
+ var rows=cat.map(function(b){var n=cuenta[b.bid]||0;var est=b.req?'<span class="badge b-info">Requiere SECOP</span>':n>0?'<span class="badge b-rojo">'+n+' detectada(s)</span>':'<span class="badge b-ok">Sin detección</span>';return '<div class="ficha"><div class="cab"><div><b>'+b.n+'</b><div class="ced">'+b.d+'</div></div>'+est+'</div></div>';}).join('');
+ return '<div class="view-head"><div><h2>Catálogo de banderas rojas</h2><p>Reglas que la plataforma vigila automáticamente. Son indicios por verificar, no acusaciones.</p></div></div>'+
+  fuente('Cada bandera se enciende <b>sola</b> con los datos cargados en Contratos, Proyectos e Interventoría. Toque un contrato o un hallazgo para ver por qué se encendió.')+
+  '<div class="card"><div style="padding:6px 16px 10px">'+rows+'</div></div>';
+};
+
+RENDER.interventoria=function(){
+ var faltan=checklist.filter(function(x){return x.req&&!x.on;}).length;
+ var items=checklist.map(function(x,i){return '<li><button class="chk'+(x.on?' on':'')+'" onclick="toggleChk('+i+')" aria-label="marcar">'+(x.on?'✓':'')+'</button><div class="ct">'+x.t+(x.req?' <span class="req">*</span>':'')+'<small>'+x.d+'</small></div></li>';}).join('');
+ return '<div class="view-head"><div><h2>Interventoría y supervisión</h2><p>Lista de verificación. Los marcados con <span class="req">*</span> son obligatorios. Toque la casilla para marcar o desmarcar; se guarda al instante.</p></div></div>'+
+  fuente('Esta lista la diligencia la interventoría. Cuando un requisito obligatorio queda sin cumplir, Auditor-IA crea solo una alerta en Hallazgos.')+
+  (faltan?'<div class="card panel mb" style="background:var(--amarillo-bg);border-color:#EAD9A6"><b>⚠️ '+faltan+' requisito(s) obligatorio(s) sin cumplir.</b><div class="sub" style="margin:4px 0 0">No deberían hacerse más pagos hasta completarlos.</div></div>':'')+
+  '<div class="card panel"><ul class="checklist">'+items+'</ul></div>';
+};
+function toggleChk(i){checklist[i].on=!checklist[i].on;log((checklist[i].on?'Cumplió':'Revirtió')+' requisito: '+checklist[i].t);toast(checklist[i].on?'✓ Requisito marcado como cumplido':'Requisito desmarcado');repintar();}
+
+RENDER.hallazgos=function(){
+ var h=hallazgos();
+ var rows=h.map(function(x){var e=seg[x.key]||{estado:'abierto',resp:'',fecha:'',nota:''};var ecls=e.estado==='cerrado'?'b-ok':e.estado==='en_proceso'?'b-naranja':'b-rojo';var elbl=e.estado==='cerrado'?'Cerrado':e.estado==='en_proceso'?'En proceso':'Abierto';
+  return '<div class="alert-row"><div class="ic ic-'+SEV[x.sev].cls+'">'+SEV[x.sev].em+'</div><div class="bd"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>'+x.tit+'</b>'+chip(x.sev)+'<span class="est-tag '+ecls+'">'+elbl+'</span></div><p>'+x.desc+'</p><div class="meta">'+x.meta+'</div>'+
+   '<div class="seg">'+
+    '<div class="field"><label>Estado</label><select id="e_'+x.key+'"><option value="abierto"'+(e.estado==='abierto'?' selected':'')+'>Abierto</option><option value="en_proceso"'+(e.estado==='en_proceso'?' selected':'')+'>En proceso</option><option value="cerrado"'+(e.estado==='cerrado'?' selected':'')+'>Cerrado</option></select></div>'+
+    '<div class="field"><label>Responsable de corregir</label><input id="r_'+x.key+'" value="'+(e.resp||'').replace(/"/g,'&quot;')+'" placeholder="Nombre y cargo"></div>'+
+    '<div class="field"><label>Fecha límite para corregir</label><input id="f_'+x.key+'" type="date" value="'+(e.fecha||'')+'"></div>'+
+    '<div class="field" style="flex:2;min-width:160px"><label>Nota: ¿qué se hizo o se decidió?</label><input id="n_'+x.key+'" value="'+(e.nota||'').replace(/"/g,'&quot;')+'" placeholder="Breve"></div>'+
+    '<div class="acc"><button class="btn btn-verde btn-sm" onclick="guardarHallazgo(\''+x.key+'\')">Guardar seguimiento</button>'+(e.resp||e.nota||e.fecha?'<span class="muted" style="font-size:12px">Último guardado por '+(e.por||'—')+'</span>':'<span class="muted" style="font-size:12px">Sin guardar aún</span>')+'</div>'+
+   '</div></div></div>';}).join('');
+ return '<div class="view-head"><div><h2>Hallazgos y su cierre</h2><p>Asigne responsable y fecha, escriba qué pasó y pulse <b>Guardar seguimiento</b>. Cada cambio queda en la bitácora.</p></div><button class="btn btn-ghost btn-sm" onclick="ir(\'informe\')">Generar informe</button></div>'+
+  fuente('Los hallazgos los <b>detecta Auditor-IA solo</b> con los datos cargados. Lo que usted escribe aquí (responsable, fecha, nota) es la <b>gestión</b> para cerrarlos, y sí se guarda al pulsar el botón.')+
+  '<div class="card">'+(rows||'<div class="alert-row"><div class="ic ic-ok">✓</div><div class="bd"><b>Sin hallazgos</b></div></div>')+'</div>';
+};
+function guardarHallazgo(k){
+ var est=document.getElementById('e_'+k).value,resp=document.getElementById('r_'+k).value,fecha=document.getElementById('f_'+k).value,nota=document.getElementById('n_'+k).value;
+ seg[k]={estado:est,resp:resp,fecha:fecha,nota:nota,por:ROLES[ROL]};guardar();
+ log('Guardó seguimiento del hallazgo ('+est+')'+(resp?' · resp. '+resp:''));
+ toast('✓ Seguimiento guardado'+(est==='cerrado'?' · hallazgo cerrado':''));repintar();
+}
+
+RENDER.cyber=function(){
+ var p=cyberPuntaje();var s=p>=80?'ok':p>=55?'amarillo':p>=35?'naranja':'rojo';
+ var q=cyberQ.map(function(x,i){return '<div class="cyberq"><div class="q">'+x.q+'<small>'+x.m+'</small></div><select onchange="setCyber('+i+',this.value)"><option value="si"'+(x.a==='si'?' selected':'')+'>Sí</option><option value="parcial"'+(x.a==='parcial'?' selected':'')+'>Parcial</option><option value="no"'+(x.a==='no'?' selected':'')+'>No</option></select></div>';}).join('');
+ return '<div class="view-head"><div><h2>Ciberseguridad <span class="addon">Módulo add-on</span></h2><p>Autodiagnóstico defensivo por marcos ISO 27001, CIS y Ley 1581. Siempre con autorización firmada del cliente.</p></div></div>'+
+  fuente('Lo responde la propia entidad. Cada respuesta cambia el puntaje y alimenta los hallazgos: "No" crea alerta roja, "Parcial" crea alerta amarilla.')+
+  '<div class="card panel mb"><div class="semaforo"><div class="sem-circle sem-'+(s==='ok'?'ok':s==='amarillo'?'amarillo':s)+'">'+p+'</div><div class="sem-txt"><b>Índice de ciberseguridad</b><p>'+(p>=80?'Buena postura; mantener.':p>=55?'Postura media; reforzar los controles incompletos.':'Postura débil; atender pronto los controles ausentes.')+'</p></div></div></div>'+
+  '<div class="card panel mb"><h3>Autodiagnóstico</h3>'+q+'</div>'+
+  '<div class="card panel"><h3>Qué incluye en producción</h3><ul style="margin:0;padding-left:20px;font-size:14px"><li>Higiene técnica no intrusiva de webs y correos.</li><li>Simulacros de concientización (phishing) a los empleados del cliente.</li><li>Gestión de vulnerabilidades con seguimiento hasta el cierre.</li></ul></div>';
+};
+function setCyber(i,v){cyberQ[i].a=v;log('Autodiagnóstico ciber actualizado');toast('✓ Respuesta guardada');repintar();}
+
+RENDER.vencimientos=function(){
+ var items=[];
+ contratos.forEach(function(c){if(c.poliza&&c.finPoliza){items.push({d:diasA(c.finPoliza),tit:'Póliza — '+c.id,sub:c.contratista,fecha:c.finPoliza,tipo:'Póliza'});}else if(!c.poliza){items.push({d:-999,tit:'Póliza ausente — '+c.id,sub:c.contratista,fecha:'—',tipo:'Póliza'});}items.push({d:diasA(c.fin),tit:'Fin de contrato — '+c.id,sub:c.obj,fecha:c.fin,tipo:'Plazo'});});
+ items.sort(function(a,b){return a.d-b.d;});
+ var rows=items.map(function(x){var sev=x.d<0?'rojo':x.d<=10?'naranja':x.d<=30?'amarillo':'ok';var txt=x.d<-900?'Sin registrar':x.d<0?'Vencido hace '+(-x.d)+' días':x.d===0?'Vence hoy':'En '+x.d+' días';return '<tr><td>'+luces(sev)+' <b>'+x.tit+'</b><br><small class="muted">'+x.sub+'</small></td><td>'+x.tipo+'</td><td class="num">'+x.fecha+'</td><td>'+chip(sev)+' <small class="muted">'+txt+'</small></td></tr>';}).join('');
+ return '<div class="view-head"><div><h2>Control de vencimientos</h2><p>Pólizas, garantías y plazos próximos a vencer.</p></div></div>'+fuente('Se calcula con las fechas que la entidad cargó en cada contrato. En producción, Auditor-IA avisa por correo (Brevo) y al WhatsApp de soporte antes de que caduquen.')+'<div class="tbl-wrap"><table><thead><tr><th>Concepto</th><th>Tipo</th><th>Fecha</th><th>Estado</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+};
+
+RENDER.bitacora=function(){
+ var rows=bitacora.length?bitacora.map(function(x){return '<div class="bit-row"><time>'+x.t+'</time><div><b>'+x.u+'</b> — '+x.txt+'</div></div>';}).join(''):'<div class="bit-row muted">Sin movimientos aún.</div>';
+ return '<div class="view-head"><div><h2>Bitácora de auditoría</h2><p>Registro de quién hizo qué y cuándo. Da trazabilidad y valor al informe.</p></div></div>'+fuente('Se llena sola cada vez que alguien ingresa, marca un requisito o guarda un hallazgo. En producción el registro es inalterable y queda en el servidor.')+'<div class="card panel">'+rows+'</div>';
+};
+
+RENDER.usuarios=function(){
+ var rows=usuarios.map(function(u,i){return '<tr><td><b>'+esc(u.nombre)+'</b></td><td>'+esc(u.correo)+'</td><td><span class="badge b-info">'+ROLES[u.rol]+'</span></td><td><button class="btn btn-ghost btn-sm" onclick="quitarUsuario('+i+')">Quitar</button></td></tr>';}).join('');
+ return '<div class="view-head"><div><h2>Usuarios y roles</h2><p>Quién entra a la plataforma y qué puede ver, según su rol.</p></div></div>'+
+  fuente('Cada usuario entra con su propio correo y contraseña. El <b>rol</b> decide qué pestañas ve (como lo vio al iniciar sesión). En producción, la contraseña la crea cada usuario y se puede recuperar por correo.')+
+  '<div class="tbl-wrap mb"><table><thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+  '<div class="card panel"><h3>Agregar usuario</h3><div class="form-grid mt">'+
+   '<div class="field"><label>Nombre *</label><input id="u_nom" placeholder="Nombre y apellido"></div>'+
+   '<div class="field"><label>Correo *</label><input id="u_cor" type="email" placeholder="persona@entidad.gov.co"></div>'+
+   '<div class="field full"><label>Rol *</label><select id="u_rol"><option value="ejecutor">Ejecutor (secretaría o dependencia)</option><option value="contratante">Contratante / Ordenador del gasto</option><option value="interventor">Interventor / Supervisor</option><option value="auditor">Auditor / Control interno</option><option value="control">Dirección / Control interno</option></select></div>'+
+  '</div><div class="mt"><button class="btn btn-verde" onclick="agregarUsuario()">Agregar usuario</button></div>'+
+  '<p class="muted mt" style="font-size:12px">En la demostración el usuario se agrega a la lista; la invitación por correo y la contraseña se hacen en producción.</p></div>';
+};
+function agregarUsuario(){var n=(document.getElementById('u_nom').value||'').trim(),c=(document.getElementById('u_cor').value||'').trim(),r=document.getElementById('u_rol').value;if(!n||!c){toast('Escriba nombre y correo.');return;}usuarios.push({nombre:n,correo:c,rol:r});log('Agregó usuario '+n+' ('+ROLES[r]+')');toast('✓ Usuario agregado');repintar();}
+function quitarUsuario(i){var u=usuarios[i];usuarios.splice(i,1);log('Quitó usuario '+(u?u.nombre:''));toast('Usuario quitado');repintar();}
+
+var alcance='consolidado';
+RENDER.informe=function(){
+ var opts='<option value="consolidado">Consolidado (toda la entidad)</option>';
+ contratos.forEach(function(c){opts+='<option value="proyecto:'+c.id+'">Proyecto '+c.id+'</option>';});
+ var vC={};contratos.forEach(function(c){if(!vC[c.nitCont]){vC[c.nitCont]=1;opts+='<option value="contratista:'+c.nitCont+'">Contratista — '+c.contratista+'</option>';}});
+ var vI={};contratos.forEach(function(c){if(!vI[c.cedInt]){vI[c.cedInt]=1;opts+='<option value="interventor:'+c.cedInt+'">Interventor — '+c.interventor+'</option>';}});
+ opts+='<option value="cyber:1">Solo ciberseguridad</option><option value="entidad:'+EMPRESA.nit+'">Entidad — NIT '+EMPRESA.nit+'</option>';
+ opts=opts.replace('value="'+alcance+'"','value="'+alcance+'" selected');
+ return '<div class="view-head"><div><h2>Informe de auditoría</h2><p>Resumen para la gerencia o el órgano de control. Elija el alcance.</p></div><div class="row-inline"><button class="btn btn-primary btn-sm" style="width:auto" onclick="descargarPDF()">Descargar PDF</button><button class="btn btn-verde btn-sm" onclick="copiarInforme()">Copiar</button></div></div><div class="field mb no-print" style="max-width:380px"><label for="alcSel">Alcance del informe</label><select id="alcSel" onchange="alcance=this.value;repintar()">'+opts+'</select></div>'+docInforme();
+};
+function filtrar(h){if(alcance==='consolidado'||alcance.indexOf('entidad:')===0)return h;if(alcance.indexOf('cyber:')===0)return h.filter(function(x){return x.bid==='cyber';});if(alcance.indexOf('proyecto:')===0){var id=alcance.split(':')[1];return h.filter(function(x){return x.tit.indexOf(id)>=0||x.meta.indexOf(id)>=0;});}if(alcance.indexOf('contratista:')===0){var nit=alcance.split(':')[1];return h.filter(function(x){return x.meta.indexOf(nit)>=0;});}if(alcance.indexOf('interventor:')===0){var ced=alcance.split(':')[1];var ids=contratos.filter(function(c){return c.cedInt===ced;}).map(function(c){return c.id;});return h.filter(function(x){return ids.some(function(id){return x.tit.indexOf(id)>=0||x.meta.indexOf(id)>=0;})||x.meta.indexOf(ced)>=0;});}return h;}
+function etq(){if(alcance==='consolidado')return 'Consolidado — '+esc(EMPRESA.nombre);if(alcance.indexOf('cyber:')===0)return 'Ciberseguridad — '+esc(EMPRESA.nombre);if(alcance.indexOf('entidad:')===0)return 'Entidad NIT '+esc(alcance.split(':')[1]);if(alcance.indexOf('proyecto:')===0)return 'Proyecto '+esc(alcance.split(':')[1]);if(alcance.indexOf('contratista:')===0){var nit=alcance.split(':')[1];var c=contratos.find(function(x){return x.nitCont===nit;});return 'Contratista '+esc(c?c.contratista:'')+' (NIT '+esc(nit)+')';}if(alcance.indexOf('interventor:')===0){var ced=alcance.split(':')[1];var c=contratos.find(function(x){return x.cedInt===ced;});return 'Interventor '+esc(c?c.interventor:'')+' (CC '+esc(ced)+')';}return '';}
+function docInforme(){
+ var h=filtrar(hallazgos());var R=h.filter(function(x){return x.sev==='rojo';}),N=h.filter(function(x){return x.sev==='naranja';}),A=h.filter(function(x){return x.sev==='amarillo';});
+ var hoy=new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
+ var li=function(arr){return arr.length?arr.map(function(x){var e=seg[x.key];var est=e&&e.estado?' — <i>'+(e.estado==='cerrado'?'Cerrado':e.estado==='en_proceso'?'En proceso':'Abierto')+(e.resp?', resp. '+e.resp:'')+'</i>':'';return '<li><b>'+x.tit+'</b>: '+x.desc+est+'</li>';}).join(''):'<li>Ninguno.</li>';};
+ return '<div class="informe" id="docInforme"><div class="doc-head"><div><h3>Informe de Auditoría Integral</h3><div class="rol-line">'+etq()+'</div><div class="rol-line">Generado por: '+ROLES[ROL]+' · '+hoy+'</div></div><svg viewBox="0 0 200 200" style="width:54px;height:54px" aria-hidden="true"><rect x="4" y="4" width="192" height="192" rx="46" fill="#1E3A4C"/><circle cx="100" cy="42" r="13" fill="#E0A21A"/><circle cx="100" cy="100" r="20" fill="#E0A21A"/><g fill="#fff"><circle cx="150.2" cy="71" r="9"/><circle cx="49.8" cy="129" r="9"/></g></svg></div>'+
+  '<div class="aviso-legal"><b>Aviso importante:</b> este informe presenta indicios y alertas basados en los datos registrados. <b>No constituye una acusación ni una prueba.</b> Los hallazgos deben ser verificados y confirmados por los responsables competentes antes de tomar cualquier decisión o acción.</div>'+
+  '<section><h4>Resumen</h4><ul><li>Alertas: <b>'+R.length+' rojas</b>, <b>'+N.length+' naranjas</b>, <b>'+A.length+' amarillas</b>.</li><li>Alcance: '+etq()+'.</li>'+(alcance.indexOf('cyber')<0?'<li>Índice de ciberseguridad: <b>'+cyberPuntaje()+'/100</b>.</li>':'')+'</ul></section>'+
+  '<section><h4>Alertas críticas (rojas)</h4><ul>'+li(R)+'</ul></section><section><h4>Alertas altas (naranjas)</h4><ul>'+li(N)+'</ul></section><section><h4>Señales por vigilar (amarillas)</h4><ul>'+li(A)+'</ul></section>'+
+  '<section><h4>Recomendaciones</h4><ul><li>Verificar en campo antes de autorizar nuevos pagos donde el desfase sea alto.</li><li>Exigir pólizas y soportes faltantes y renovar las que están por vencer.</li><li>Revisar todos los contratos de un contratista cuando uno presenta alerta.</li><li>Requerir explicación al interventor o auditor que aprobó pese a las alertas.</li><li>Cerrar cada hallazgo con responsable y fecha, dejando constancia en la bitácora.</li></ul></section>'+
+  '<div class="doc-foot"><svg viewBox="0 0 200 200" aria-hidden="true"><rect x="4" y="4" width="192" height="192" rx="46" fill="#1E3A4C"/><circle cx="100" cy="100" r="20" fill="#E0A21A"/><circle cx="100" cy="42" r="13" fill="#E0A21A"/></svg><span>Generado con <b>Auditor-IA</b> — SkyNet Genesis · contacto@skynetgenesis.com · WhatsApp 3044375758</span></div></div><p class="muted mt no-print" style="font-size:12.5px">Con "Descargar PDF" se abre la impresión: elija <b>Guardar como PDF</b>. El documento sale con el membrete y el aviso legal.</p>';
+}
+function descargarPDF(){log('Descargó el informe en PDF: '+etq());document.body.classList.add('imprimiendo');setTimeout(function(){window.print();setTimeout(function(){document.body.classList.remove('imprimiendo');},400);},60);}
+function copiarInforme(){log('Generó informe: '+etq());var el=document.getElementById('docInforme');var t=(el?el.innerText:'').trim();if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){toast('✓ Informe copiado');},function(){selr(el);});}else selr(el);}
+function selr(el){try{var r=document.createRange();r.selectNodeContents(el);var s=getSelection();s.removeAllRanges();s.addRange(r);toast('Informe seleccionado: copie con el menú');}catch(e){toast('Seleccione el texto para copiarlo');}}
+
+var TIPOS_ENTIDAD=['Presidencia de la República','Ministerio / Departamento Administrativo','Gobernación','Alcaldía','Contraloría / Personería / Procuraduría','Entidad descentralizada','Empresa privada','ONG / Fundación','Otra'];
+RENDER.admin=function(){
+ var e=estadoPago();var box=e.key==='activa'?'pay-activa':e.key==='aviso'?'pay-aviso':'pay-cerrada';
+ var pr=calcPrecio();
+ var optTipo=TIPOS_ENTIDAD.map(function(t){return '<option'+(EMPRESA.tipo===t?' selected':'')+'>'+t+'</option>';}).join('');
+ return '<div class="view-head"><div><h2>Administración y parametrización</h2><p>Tipo de entidad, alcance, precio y pago a SkyNet Genesis.</p></div></div>'+
+  '<div class="card panel mb"><h3>Parametrización de la entidad</h3><div class="sub">Defina quién es la entidad, qué tipo es y a quién vigila. El precio se calcula solo.</div><div class="form-grid mt">'+
+   '<div class="field"><label>Nombre de la entidad</label><input value="'+(EMPRESA.nombre||'').replace(/"/g,'&quot;')+'" onchange="setParam(\'nombre\',this.value)"></div>'+
+   '<div class="field"><label>NIT</label><input value="'+(EMPRESA.nit||'').replace(/"/g,'&quot;')+'" onchange="setParam(\'nit\',this.value)"></div>'+
+   '<div class="field"><label>Tipo de entidad</label><select onchange="setParam(\'tipo\',this.value)">'+optTipo+'</select></div>'+
+   '<div class="field"><label>Alcance</label><select onchange="setParam(\'alcance\',this.value)"><option value="una"'+(EMPRESA.alcance==='una'?' selected':'')+'>Solo mi entidad</option><option value="varias"'+(EMPRESA.alcance==='varias'?' selected':'')+'>Varias entidades (órgano de control)</option></select></div>'+
+   (EMPRESA.alcance==='varias'?'<div class="field"><label>N° de entidades a auditar</label><input type="number" min="1" value="'+EMPRESA.numEnt+'" onchange="setParam(\'numEnt\',this.value)"></div>':'')+
+  '</div></div>'+
+  '<div class="card panel mb"><h3>Su precio</h3><div class="pay-state" style="background:var(--azul-suave)"><div class="big" style="color:var(--azul)">'+pr.titulo+'</div><div style="font-size:13.5px">'+pr.detalle+'</div></div><p class="muted" style="font-size:12px;margin-top:8px">'+pr.nota+'</p></div>'+
+  '<div class="card mb"><div class="panel"><h3>Estado de la suscripción</h3><div class="sub">Sin mora: si no paga, el acceso se cierra el día 5 del mes siguiente. Prueba gratis de 15 días. El bloqueo lo aplica el servidor.</div><div class="pay-state '+box+'"><div class="big">'+e.label+'</div><div style="font-size:13.5px">'+e.msg+'</div></div><div class="row-inline mt"><div class="field"><label for="pagHasta">Pagado hasta</label><input type="date" id="pagHasta" value="'+EMPRESA.pagadoHasta+'"></div><button class="btn btn-verde btn-sm" onclick="guardarPago()">Actualizar</button></div></div></div>'+
+  '<div class="card"><div class="panel"><h3>Tarifas de referencia</h3><div class="sub">El pago se hace en línea solo con Bold de SkyNet Genesis.</div>'+
+   '<div class="llave-box"><div class="kv" style="font-weight:700;color:var(--azul)"><span>Una sola entidad (por N° de contratos)</span><span></span></div><div class="kv"><span>Básico — hasta 25 contratos</span><b>$65M/año</b></div><div class="kv"><span>Profesional — hasta 100</span><b>$130M/año</b></div><div class="kv"><span>Control — ilimitado</span><b>$260M/año</b></div></div>'+
+   '<div class="llave-box" style="margin-top:10px"><div class="kv" style="font-weight:700;color:var(--azul)"><span>Multientidad (por entidad auditada / año)</span><span></span></div><div class="kv"><span>1 – 10 entidades</span><b>$45M c/u</b></div><div class="kv"><span>11 – 30</span><b>$35M c/u</b></div><div class="kv"><span>31 – 80</span><b>$28M c/u</b></div><div class="kv"><span>81 – 200</span><b>$22M c/u</b></div><div class="kv"><span>201 – 500 · gobernaciones, contralorías</span><b>$18M c/u</b></div><div class="kv"><span>501+ · Presidencia, ministerios, Contraloría General</span><b>$14M c/u</b></div></div>'+
+   '<div class="llave-box" style="background:var(--verde-suave);margin-top:10px"><div class="kv" style="font-weight:700;color:var(--verde-osc)"><span>Market de módulos</span><span>aparte</span></div><div class="kv"><span>Ciberseguridad</span><b>$32M/año</b></div><div class="kv"><span>Auditoría puntual</span><b>$27.000.000</b></div></div>'+
+   '<div class="row-inline mt"><button class="btn btn-primary" style="width:auto" onclick="toast(\'Esto es una demostración: no se cobra nada. En producción abre la pasarela de Bold.\')">Pagar en línea con Bold</button></div>'+
+   '<p class="muted" style="font-size:12px;margin-top:10px">Referencia en todo documento: contacto@skynetgenesis.com · WhatsApp 3044375758.</p></div></div>';
+};
+function setParam(k,v){if(k==='numEnt'){EMPRESA.numEnt=Math.max(1,parseInt(v||'1'));}else{EMPRESA[k]=v;if(k==='alcance'&&v==='varias'&&(!EMPRESA.numEnt||EMPRESA.numEnt<1))EMPRESA.numEnt=5;}if(k==='nombre'){var en=document.getElementById('empName');if(en)en.textContent=v;}log('Parametrización: '+k+' = '+v);toast('✓ Parametrización actualizada');repintar();}
+function tarifaEntidad(n){return n<=10?45000000:n<=30?35000000:n<=80?28000000:n<=200?22000000:n<=500?18000000:14000000;}
+function tramoEntidad(n){return n<=10?'1–10':n<=30?'11–30':n<=80?'31–80':n<=200?'81–200':n<=500?'201–500':'501+';}
+function calcPrecio(){
+ if(EMPRESA.alcance==='varias'){
+  var n=EMPRESA.numEnt||1;var tar=tarifaEntidad(n);
+  return {titulo:fmt(n*tar)+'/año',detalle:'Multientidad ('+EMPRESA.tipo+'): '+n+' entidades × '+fmt(tar)+' c/u (tramo '+tramoEntidad(n)+').',nota:'Precio por lista, fijo y sin cotización discrecional: entre más entidades vigile, más baja el valor por cada una. Equivale a '+fmt(Math.round(n*tar/12))+'/mes.'};
+ }
+ var c=contratos.length;var plan=c<=25?['Básico',65000000]:c<=100?['Profesional',130000000]:['Control (ilimitado)',260000000];
+ return {titulo:plan[0]+' — '+fmt(plan[1])+'/año',detalle:'Una sola entidad ('+EMPRESA.tipo+') con '+c+' contrato(s) cargados. Equivale a '+fmt(Math.round(plan[1]/12))+'/mes.',nota:'El plan sube solo si supera el número de contratos del tramo.'};
+}
+function estadoPago(){var hoy=new Date(hoyISO+'T00:00:00');var ph=new Date(EMPRESA.pagadoHasta+'T00:00:00');if(hoy<=ph)return {key:'activa',label:'Activa',msg:'Suscripción al día. Vence el '+EMPRESA.pagadoHasta+'.'};var cierre=new Date(ph.getFullYear(),ph.getMonth()+1,5);if(hoy<cierre){var d=Math.ceil((cierre-hoy)/86400000);return {key:'aviso',label:'Por pagar',msg:'Pago vencido. Tiene hasta el día 5 ('+d+' día(s)) para pagar con Bold antes de que se cierre el acceso.'};}return {key:'cerrada',label:'Cerrada por pago',msg:'Acceso cerrado por falta de pago. Pague con Bold para reactivar; el bloqueo lo aplica el servidor.'};}
+function guardarPago(){var v=document.getElementById('pagHasta').value;if(v){EMPRESA.pagadoHasta=v;log('Actualizó "Pagado hasta" a '+v);toast('✓ Fecha actualizada. Acceso restablecido.');repintar();}}
+
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function finDeMes(){var d=new Date();var f=new Date(d.getFullYear(),d.getMonth()+1,0);return f.toISOString().slice(0,10);}
+var _tt;function toast(m){var t=document.getElementById('toast');t.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span>'+m+'</span>';t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show');},4200);}
+
+/* ===================== ESCRITURA: Neon en producción / memoria en demo ===================== */
+async function agregarContrato(){
+ var id=gv('f_id').trim(),obj=gv('f_obj').trim(),cont=gv('f_contratista').trim(),valor=parseFloat(gv('f_valor')||'0');
+ if(!id||!obj||!cont||!valor){toast('Complete código, objeto, contratista y valor.');return;}
+ var fis=parseInt(gv('f_fis')||'0'),finp=parseInt(gv('f_finp')||'0');
+ var nit=(gv('f_nit')||'—').trim(),intv=(gv('f_int')||'—').trim(),ord=(gv('f_ord')||'—').trim(),fin=gv('f_fin')||null,pol=gv('f_pol')==='si',ejec=Math.round(valor*finp/100);
+ if(DEMO){var c={id:id,obj:obj,contratista:cont,nitCont:nit,interventor:intv,cedInt:'—',intAprobo:false,ordenador:ord,cedOrd:'—',valor:valor,ejecutado:ejec,fin:fin,poliza:pol,finPoliza:null,otrosi:0,anticipo:0,antAmort:0,cargadoPor:ROLES[ROL],fecha:hoyISO,doc:null};contratos.push(c);if(fis||finp)proyectos[id]={nombre:obj,fisico:fis,financiero:finp};log('Registró el contrato '+id);toast('✓ Contrato '+id+' registrado y analizado.');contratoVista='lista';repintar();return;}
+ try{var ins=await q(N().from('contrato').insert({entidad_id:ENTIDAD_ID,codigo:id,objeto:obj,contratista:cont,nit_contratista:nit,interventor:intv,ordenador:ord,valor:valor,ejecutado:ejec,fin:fin,tiene_poliza:pol}).select());
+  var nuevo=ins&&ins[0]?mapContrato(ins[0]):null;
+  if(nuevo&&(fis||finp)){await q(N().from('proyecto').insert({entidad_id:ENTIDAD_ID,contrato_id:nuevo._uuid,nombre:obj,fisico:fis,financiero:finp,presupuesto:valor}).select());}
+  log('Registró el contrato '+id);await cargarDatos();toast('✓ Contrato '+id+' registrado y analizado.');contratoVista='lista';repintar();
+ }catch(e){toast('No se pudo guardar: '+trad(e));}
+}
+async function toggleChk(i){var it=checklist[i];if(!it)return;var nuevo=!it.on;
+ if(DEMO){it.on=nuevo;log((nuevo?'Cumplió':'Revirtió')+' requisito: '+it.t);toast(nuevo?'✓ Requisito marcado como cumplido':'Requisito desmarcado');repintar();return;}
+ try{await q(N().from('requisito').update({cumplido:nuevo}).eq('id',it._uuid));it.on=nuevo;log((nuevo?'Cumplió':'Revirtió')+' requisito: '+it.t);toast(nuevo?'✓ Requisito marcado como cumplido':'Requisito desmarcado');repintar();}
+ catch(e){toast('No se pudo guardar: '+trad(e));}
+}
+async function setCyber(i,v){var it=cyberQ[i];if(!it)return;
+ if(DEMO){it.a=v;log('Autodiagnóstico ciber actualizado');toast('✓ Respuesta guardada');repintar();return;}
+ try{if(it._uuid){await q(N().from('cyber_respuesta').update({respuesta:v}).eq('id',it._uuid));}else{var ins=await q(N().from('cyber_respuesta').insert({entidad_id:ENTIDAD_ID,pregunta:it.q,marco:it.m,respuesta:v}).select());if(ins&&ins[0])it._uuid=ins[0].id;}it.a=v;log('Autodiagnóstico ciber actualizado');toast('✓ Respuesta guardada');repintar();}
+ catch(e){toast('No se pudo guardar: '+trad(e));}
+}
+async function guardarHallazgo(k){var est=gv('e_'+k),resp=gv('r_'+k),fecha=gv('f_'+k),nota=gv('n_'+k);
+ if(DEMO){seg[k]={estado:est,resp:resp,fecha:fecha,nota:nota,por:ROLES[ROL]};log('Guardó seguimiento del hallazgo ('+est+')'+(resp?' · resp. '+resp:''));toast('✓ Seguimiento guardado'+(est==='cerrado'?' · hallazgo cerrado':''));repintar();return;}
+ try{var ex=seg[k]&&seg[k]._uuid;
+  if(ex){await q(N().from('hallazgo_seg').update({estado:est,responsable:resp,fecha_limite:fecha||null,nota:nota}).eq('id',ex));}
+  else{var ins=await q(N().from('hallazgo_seg').insert({entidad_id:ENTIDAD_ID,clave:k,estado:est,responsable:resp,fecha_limite:fecha||null,nota:nota}).select());if(ins&&ins[0])ex=ins[0].id;}
+  seg[k]={estado:est,resp:resp,fecha:fecha,nota:nota,por:usuarioNombre,_uuid:ex};
+  log('Guardó seguimiento del hallazgo ('+est+')'+(resp?' · resp. '+resp:''));toast('✓ Seguimiento guardado'+(est==='cerrado'?' · hallazgo cerrado':''));repintar();
+ }catch(e){toast('No se pudo guardar: '+trad(e));}
+}
+async function agregarUsuario(){var n=gv('u_nom').trim(),c=gv('u_cor').trim(),r=gv('u_rol');
+ if(DEMO){if(!n||!c){toast('Escriba nombre y correo.');return;}usuarios.push({nombre:n,correo:c,rol:r});log('Agregó usuario '+n+' ('+ROLES[r]+')');toast('✓ Usuario agregado');repintar();return;}
+ try{var res=await rpc('nuevo_codigo',{p_entidad:ENTIDAD_ID,p_rol:r});if(!res||!res.ok){toast((res&&res.error)||'No autorizado.');return;}log('Generó código de acceso ('+ROLES[r]+')');window.__codigoNuevo={codigo:res.codigo,rol:r};repintar();}
+ catch(e){toast('No se pudo: '+trad(e));}
+}
+function quitarUsuario(i){if(DEMO){var u=usuarios[i];usuarios.splice(i,1);log('Quitó usuario '+(u?u.nombre:''));toast('Usuario quitado');repintar();return;}toast('Para retirar a un usuario, escríbanos a contacto@skynetgenesis.com. (La gestión se hace con códigos de acceso.)');}
+function setParam(k,v){if(k==='numEnt'){EMPRESA.numEnt=Math.max(1,parseInt(v||'1'));}else{EMPRESA[k]=v;if(k==='alcance'&&v==='varias'&&(!EMPRESA.numEnt||EMPRESA.numEnt<1))EMPRESA.numEnt=5;}if(k==='nombre'){var en=document.getElementById('empName');if(en)en.textContent=v;}
+ if(!DEMO&&ENTIDAD_ID&&(k==='nombre'||k==='nit'||k==='tipo')){var patch={};patch[k]=v;q(N().from('entidad').update(patch).eq('id',ENTIDAD_ID)).catch(function(e){toast('No se pudo guardar: '+trad(e));});}
+ log('Parametrización: '+k+' = '+v);toast('✓ Parametrización actualizada');repintar();
+}
+function estadoPago(){var hoy=new Date(hoyISO+'T00:00:00');
+ if(EMPRESA.pruebaHasta&&!EMPRESA.pagadoHasta){var pr=new Date(EMPRESA.pruebaHasta+'T00:00:00');if(hoy<=pr){var dd=Math.ceil((pr-hoy)/86400000);return {key:'activa',label:'Prueba gratis',msg:'Prueba gratuita activa. Vence el '+EMPRESA.pruebaHasta+' ('+dd+' día(s)). Pague con Bold para continuar sin interrupción.'};}}
+ if(!EMPRESA.pagadoHasta)return {key:'cerrada',label:'Sin pago',msg:'Aún no hay un pago registrado. Pague con Bold para activar el acceso.'};
+ var ph=new Date(EMPRESA.pagadoHasta+'T00:00:00');if(hoy<=ph)return {key:'activa',label:'Activa',msg:'Suscripción al día. Vence el '+EMPRESA.pagadoHasta+'.'};
+ var cierre=new Date(ph.getFullYear(),ph.getMonth()+1,5);if(hoy<cierre){var d=Math.ceil((cierre-hoy)/86400000);return {key:'aviso',label:'Por pagar',msg:'Pago vencido. Tiene hasta el día 5 ('+d+' día(s)) para pagar con Bold antes de que se cierre el acceso.'};}
+ return {key:'cerrada',label:'Cerrada por pago',msg:'Acceso cerrado por falta de pago. Pague con Bold para reactivar; el bloqueo lo aplica el servidor.'};
+}
+function planActual(){var c=contratos.length;return c<=25?'basico':c<=100?'profesional':'control';}
+function pagarBold(){if(DEMO){toast('Esto es una demostración: no se cobra nada. En producción abre la pasarela de Bold.');return;}if(!ENTIDAD_ID){toast('Primero active su entidad.');return;}var url='https://skynetgenesis.com/bold-firma.php?plan=auditor-ia:'+planActual()+'&empresa='+encodeURIComponent(ENTIDAD_ID)+'&meses=1&volver='+encodeURIComponent(location.origin+location.pathname);window.open(url,'_blank');log('Abrió el pago con Bold ('+planActual()+')');}
+
+/* ---------- Superadmin: crear entidad ---------- */
+async function crearEntidad(){var n=gv('se_nom').trim(),nit=gv('se_nit').trim(),tipo=gv('se_tipo'),plan=gv('se_plan');if(!n){toast('Escriba el nombre de la entidad.');return;}
+ try{var res=await rpc('crear_entidad',{p_nombre:n,p_nit:nit||null,p_tipo:tipo,p_plan:plan});if(!res||!res.ok){toast((res&&res.error)||'No autorizado.');return;}window.__codigoEntidad={nombre:n,codigo:res.codigo};toast('✓ Entidad creada');repintar();}
+ catch(e){toast('No se pudo: '+trad(e));}
+}
+
+/* ---------- RENDER.admin (producción: cobro de solo lectura + Bold) ---------- */
+RENDER.admin=function(){
+ var e=estadoPago();var box=e.key==='activa'?'pay-activa':e.key==='aviso'?'pay-aviso':'pay-cerrada';var pr=calcPrecio();
+ var optTipo=TIPOS_ENTIDAD.map(function(t){return '<option'+(EMPRESA.tipo===t?' selected':'')+'>'+t+'</option>';}).join('');
+ var superPanel='';
+ if(SUPER){var ce=window.__codigoEntidad;
+  superPanel='<div class="card panel mb" style="border:2px solid var(--verde)"><h3>Superadministrador — crear entidad</h3><div class="sub">Crea una entidad nueva y genera el código de activación para su administrador.</div><div class="form-grid mt">'+
+   '<div class="field"><label>Nombre de la entidad</label><input id="se_nom" placeholder="Alcaldía de ..."></div>'+
+   '<div class="field"><label>NIT</label><input id="se_nit" placeholder="800.000.000-0"></div>'+
+   '<div class="field"><label>Tipo</label><select id="se_tipo">'+TIPOS_ENTIDAD.map(function(t){return '<option>'+t+'</option>';}).join('')+'</select></div>'+
+   '<div class="field"><label>Plan</label><select id="se_plan"><option value="basico">Básico</option><option value="profesional">Profesional</option><option value="control">Control</option></select></div>'+
+   '</div><div class="mt"><button class="btn btn-verde" onclick="crearEntidad()">Crear entidad y generar código</button></div>'+
+   (ce?'<div class="pay-state pay-activa mt"><div class="big">Entidad creada: '+esc(ce.nombre)+'</div><div>Código de activación del administrador: <b style="font-size:18px;letter-spacing:1px">'+esc(ce.codigo)+'</b></div><div style="font-size:12.5px;margin-top:4px">Entréguelo a la persona. Al registrarse lo escribe para quedar como Dirección/Control de esa entidad.</div></div>':'')+'</div>';
+  if(ENTIDAD_ID===null){return '<div class="view-head"><div><h2>Panel de SkyNet Genesis</h2><p>Administración de la plataforma Auditor-IA.</p></div></div>'+superPanel;}
+ }
+ return '<div class="view-head"><div><h2>Administración y parametrización</h2><p>Tipo de entidad, alcance, precio y pago a SkyNet Genesis.</p></div></div>'+superPanel+
+  '<div class="card panel mb"><h3>Parametrización de la entidad</h3><div class="sub">Defina quién es la entidad y qué tipo es. El precio se calcula solo.</div><div class="form-grid mt">'+
+   '<div class="field"><label>Nombre de la entidad</label><input value="'+esc(EMPRESA.nombre)+'" onchange="setParam(\'nombre\',this.value)"></div>'+
+   '<div class="field"><label>NIT</label><input value="'+esc(EMPRESA.nit)+'" onchange="setParam(\'nit\',this.value)"></div>'+
+   '<div class="field"><label>Tipo de entidad</label><select onchange="setParam(\'tipo\',this.value)">'+optTipo+'</select></div>'+
+   '<div class="field"><label>Alcance (solo cálculo de precio)</label><select onchange="setParam(\'alcance\',this.value)"><option value="una"'+(EMPRESA.alcance==='una'?' selected':'')+'>Solo mi entidad</option><option value="varias"'+(EMPRESA.alcance==='varias'?' selected':'')+'>Varias entidades (órgano de control)</option></select></div>'+
+   (EMPRESA.alcance==='varias'?'<div class="field"><label>N° de entidades a auditar</label><input type="number" min="1" value="'+EMPRESA.numEnt+'" onchange="setParam(\'numEnt\',this.value)"></div>':'')+
+  '</div></div>'+
+  '<div class="card panel mb"><h3>Su precio</h3><div class="pay-state" style="background:var(--azul-suave)"><div class="big" style="color:var(--azul)">'+pr.titulo+'</div><div style="font-size:13.5px">'+pr.detalle+'</div></div><p class="muted" style="font-size:12px;margin-top:8px">'+pr.nota+'</p></div>'+
+  '<div class="card panel mb"><h3>Estado de la suscripción</h3><div class="sub">Sin mora: si no paga, el acceso se cierra el día 5 del mes siguiente. Prueba gratis de 15 días. El bloqueo lo aplica el servidor; el "Pagado hasta" solo lo mueve un pago de Bold.</div><div class="pay-state '+box+'"><div class="big">'+e.label+'</div><div style="font-size:13.5px">'+e.msg+'</div></div><div class="mt"><button class="btn btn-primary" style="width:auto" onclick="pagarBold()">Pagar en línea con Bold</button></div></div>'+
+  '<div class="card"><div class="panel"><h3>Tarifas de referencia</h3><div class="sub">El pago se hace en línea solo con Bold de SkyNet Genesis.</div>'+
+   '<div class="llave-box"><div class="kv" style="font-weight:700;color:var(--azul)"><span>Una sola entidad (por N° de contratos)</span><span></span></div><div class="kv"><span>Básico — hasta 25 contratos</span><b>$65M/año</b></div><div class="kv"><span>Profesional — hasta 100</span><b>$130M/año</b></div><div class="kv"><span>Control — ilimitado</span><b>$260M/año</b></div></div>'+
+   '<div class="llave-box" style="margin-top:10px"><div class="kv" style="font-weight:700;color:var(--azul)"><span>Multientidad (por entidad auditada / año)</span><span></span></div><div class="kv"><span>1 – 10 entidades</span><b>$45M c/u</b></div><div class="kv"><span>11 – 30</span><b>$35M c/u</b></div><div class="kv"><span>31 – 80</span><b>$28M c/u</b></div><div class="kv"><span>81 – 200</span><b>$22M c/u</b></div><div class="kv"><span>201 – 500 · gobernaciones, contralorías</span><b>$18M c/u</b></div><div class="kv"><span>501+ · Presidencia, ministerios, Contraloría General</span><b>$14M c/u</b></div></div>'+
+   '<div class="llave-box" style="background:var(--verde-suave);margin-top:10px"><div class="kv" style="font-weight:700;color:var(--verde-osc)"><span>Market de módulos</span><span>aparte</span></div><div class="kv"><span>Ciberseguridad</span><b>$32M/año</b></div><div class="kv"><span>Auditoría puntual</span><b>$27.000.000</b></div></div>'+
+   '<p class="muted" style="font-size:12px;margin-top:10px">Referencia en todo documento: contacto@skynetgenesis.com · WhatsApp 3044375758.</p></div></div>';
+};
+
+/* ---------- RENDER.usuarios (producción: alta por código de activación) ---------- */
+RENDER.usuarios=function(){
+ var rows=usuarios.map(function(u,i){return '<tr><td><b>'+esc(u.nombre)+'</b></td><td>'+esc(u.correo)+'</td><td><span class="badge b-info">'+(ROLES[u.rol]||u.rol)+'</span></td><td>'+(DEMO?'<button class="btn btn-ghost btn-sm" onclick="quitarUsuario('+i+')">Quitar</button>':'')+'</td></tr>';}).join('');
+ var cod=window.__codigoNuevo;
+ var banner=cod?'<div class="pay-state pay-activa mb"><div class="big">Código de activación ('+(ROLES[cod.rol]||cod.rol)+')</div><div>Entréguelo a la persona: <b style="font-size:20px;letter-spacing:1px">'+esc(cod.codigo)+'</b></div><div style="font-size:12.5px;margin-top:4px">Al registrarse en Auditor-IA, escribe este código para quedar vinculada a su entidad con ese rol.</div></div>':'';
+ window.__codigoNuevo=null;
+ return '<div class="view-head"><div><h2>Usuarios y roles</h2><p>Quién entra a la plataforma y qué puede ver, según su rol.</p></div></div>'+
+  fuente('Cada usuario entra con su propio correo y contraseña. El <b>rol</b> decide qué pestañas ve. '+(DEMO?'En producción se agrega generando un código de activación.':'Para sumar a alguien, genere un código de activación y entréguelo; esa persona se registra y lo escribe.')+'')+
+  banner+
+  '<div class="tbl-wrap mb"><table><thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+  '<div class="card panel"><h3>'+(DEMO?'Agregar usuario':'Generar código de acceso')+'</h3><div class="form-grid mt">'+
+   (DEMO?'<div class="field"><label>Nombre *</label><input id="u_nom" placeholder="Nombre y apellido"></div><div class="field"><label>Correo *</label><input id="u_cor" type="email" placeholder="persona@entidad.gov.co"></div>':'')+
+   '<div class="field full"><label>Rol *</label><select id="u_rol"><option value="ejecutor">Ejecutor (secretaría o dependencia)</option><option value="contratante">Contratante / Ordenador del gasto</option><option value="interventor">Interventor / Supervisor</option><option value="auditor">Auditor / Control interno</option><option value="control">Dirección / Control interno</option></select></div>'+
+  '</div><div class="mt"><button class="btn btn-verde" onclick="agregarUsuario()">'+(DEMO?'Agregar usuario':'Generar código')+'</button></div>'+
+  '<p class="muted mt" style="font-size:12px">'+(DEMO?'En la demostración el usuario se agrega a la lista.':'El código es de un solo uso. La persona crea su propia contraseña al registrarse.')+'</p></div>';
+};
+
+/* ===================== Editor de avance físico ===================== */
+function efis(id,v){return '<div class="row-inline no-print" style="margin-top:6px;align-items:center"><span style="font-size:12px;color:var(--suave)">Corregir físico:</span><input type="number" min="0" max="100" data-key="'+esc(id)+'" value="'+v+'" style="max-width:90px"><button class="btn btn-verde btn-sm" onclick="setFisico(this)">Guardar</button></div>';}
+async function setFisico(btn){var inp=btn.parentElement.querySelector('input');var key=inp.getAttribute('data-key');var p=proyectos[key];if(!p)return;var v=Math.max(0,Math.min(100,parseInt(inp.value||'0')||0));
+ if(DEMO){p.fisico=v;log('Avance físico de '+key+' = '+v+'%');toast('✓ Avance físico actualizado');repintar();return;}
+ try{if(p._uuid){await q(N().from('proyecto').update({fisico:v}).eq('id',p._uuid));}p.fisico=v;log('Avance físico de '+key+' = '+v+'%');toast('✓ Avance físico actualizado');repintar();}
+ catch(e){toast('No se pudo guardar: '+trad(e));}
+}
+
+/* ===================== Panel de impacto / ROI ===================== */
+RENDER.impacto=function(){
+ var h=hallazgos();var tot=h.length;
+ var cerr=h.filter(function(x){return seg[x.key]&&seg[x.key].estado==='cerrado';}).length;
+ var proc=h.filter(function(x){return seg[x.key]&&seg[x.key].estado==='en_proceso';}).length;
+ var abiertos=tot-cerr-proc;
+ var valVig=contratos.reduce(function(s,c){return s+c.valor;},0);
+ var riesgo=0;contratos.forEach(function(c){var p=proyectos[c.id];if(p){var d=p.financiero-p.fisico;if(d>=12)riesgo+=Math.round(c.valor*d/100);}});
+ var nSecop=contratos.filter(function(c){return c.fuente==='secop';}).length;
+ var costoPlan=(function(){var c=contratos.length;return c<=25?65000000:c<=100?130000000:260000000;})();
+ var pctCierre=tot?Math.round((cerr/tot)*100):0;
+ return '<div class="view-head"><div><h2>Impacto de la vigilancia</h2><p>Lo que Auditor-IA está protegiendo y gestionando. Útil para la rendición de cuentas y para decidir la renovación.</p></div></div>'+
+  fuente('Estas cifras se calculan solas con los contratos y hallazgos de su entidad. El "valor en riesgo" es el dinero pagado por encima del avance de obra: no es una pérdida confirmada, es lo que hay que verificar.')+
+  '<div class="grid kpis mb">'+
+   kpi('azul',contratos.length,'Contratos vigilados',fmt(valVig)+' en total')+
+   kpi(riesgo?'s-rojo':'s-ok',riesgo?fmt(riesgo):'$0','Recursos en riesgo','Pagado por encima del avance')+
+   kpi('verde',cerr,'Hallazgos cerrados',pctCierre+'% de '+tot+' con seguimiento')+
+   kpi(abiertos?'s-naranja':'s-ok',abiertos,'Hallazgos abiertos','Pendientes de gestionar')+
+  '</div>'+
+  '<div class="card panel mb"><h3>Retorno de la inversión</h3><div class="sub">Lo que cuesta la plataforma frente a lo que le ayuda a vigilar.</div><div class="pay-state" style="background:var(--azul-suave);color:var(--texto)"><div class="big" style="color:var(--azul)">'+fmt(valVig)+' bajo vigilancia permanente</div><div style="font-size:13.5px">Por '+fmt(costoPlan)+'/año (su plan): el '+(valVig?(costoPlan/valVig*100).toFixed(3):'0')+'% del valor vigilado. Una sola irregularidad detectada a tiempo suele superar el costo anual.</div></div></div>'+
+  '<div class="card panel"><h3>Origen de los datos</h3><div class="sub">Entre más datos objetivos (SECOP), más confiable la vigilancia.</div><div class="llave-box mt"><div class="kv"><span>Contratos traídos de SECOP</span><b>'+nSecop+'</b></div><div class="kv"><span>Cargados a mano / importados</span><b>'+(contratos.length-nSecop)+'</b></div></div>'+(nSecop===0?'<p class="muted mt" style="font-size:12.5px">Aún no ha conectado SECOP. Vaya a <b>Importar datos</b> para traer sus contratos reales sin digitarlos.</p>':'')+'</div>';
+};
+
+/* ===================== Importar datos: SECOP y CSV ===================== */
+function nitDigits(nit){var s=String(nit||'');var base=(s.indexOf('-')>=0?s.split('-')[0]:s).replace(/\D/g,'');if(s.indexOf('-')<0&&base.length===10)base=base.slice(0,-1);return base;}
+var SECOP_URL='https://www.datos.gov.co/resource/jbjy-vk9h.json';
+function mapSecopRow(r){var nd=function(x){return (x&&x!=='No definido'&&x!=='No Definido')?x:'';};var ndc=function(x){return (x&&/^\d+$/.test(String(x)))?String(x):'';};
+ return {codigo:r.referencia_del_contrato||r.id_contrato||'',objeto:(r.objeto_del_contrato||r.descripcion_del_proceso||'').slice(0,500),contratista:r.proveedor_adjudicado||'',nit_contratista:r.documento_proveedor||'',interventor:nd(r.nombre_supervisor),ced_interventor:ndc(r.n_mero_de_documento_supervisor),ordenador:nd(r.nombre_ordenador_del_gasto),ced_ordenador:ndc(r.n_mero_de_documento_ordenador_del_gasto),valor:+r.valor_del_contrato||0,ejecutado:+r.valor_pagado||0,fin:(r.fecha_de_fin_del_contrato||'').slice(0,10)||null,anticipo:+r.valor_de_pago_adelantado||0,anticipo_amort:+r.valor_amortizado||0,modalidad:r.modalidad_de_contratacion||'',tipo:r.tipo_de_contrato||'',estado:r.estado_contrato||'',url_secop:(r.urlproceso&&r.urlproceso.url)||'',rep_legal:nd(r.nombre_representante_legal),ced_rep_legal:ndc(r.identificaci_n_representante_legal),dias_adic:+r.dias_adicionados||0,fuente:'secop',id_secop:r.id_contrato||r.proceso_de_compra||''};
+}
+async function buscarSecop(){
+ var nit=(gv('secNit')||'').replace(/\D/g,'');var anio=parseInt(gv('secAnio')||'0')||0;
+ if(!nit){toast('Escriba el NIT de la entidad.');return;}
+ var cont=document.getElementById('secopRes');cont.innerHTML='<div class="sub" style="padding:8px 0">Consultando SECOP…</div>';
+ try{
+  var where="nit_entidad='"+nit+"'";if(anio)where+=" AND fecha_de_firma>='"+anio+"-01-01T00:00:00.000'";
+  var url=SECOP_URL+'?$where='+encodeURIComponent(where)+'&$order='+encodeURIComponent('fecha_de_firma DESC')+'&$limit=1000';
+  var rows=await fetch(url).then(function(r){if(!r.ok)throw new Error('SECOP respondió '+r.status);return r.json();});
+  if(!rows.length){cont.innerHTML='<div class="card panel" style="background:var(--amarillo-bg);border-color:#EAD9A6">No se encontraron contratos en SECOP II para el NIT <b>'+esc(nit)+'</b> desde '+anio+'. Verifique el NIT (sin dígito de verificación) o baje el año.</div>';return;}
+  window.__secop=rows.map(mapSecopRow).filter(function(x){return x.codigo&&x.valor>0;});
+  pintarSecop();
+ }catch(e){cont.innerHTML='<div class="card panel" style="background:var(--rojo-bg);border-color:#E7B7B0">No se pudo consultar SECOP: '+esc(e.message||String(e))+'. Intente de nuevo en un momento.</div>';}
+}
+function pintarSecop(){
+ var rows=window.__secop||[];var yaImp={};contratos.forEach(function(c){if(c.idSecop)yaImp[c.idSecop]=1;});
+ var nuevos=rows.filter(function(r){return !yaImp[r.id_secop];});
+ var head='<div class="pay-state" style="background:var(--verde-suave);color:var(--texto)"><div class="big" style="color:var(--verde-osc)">'+rows.length+' contratos encontrados</div><div style="font-size:13px">'+nuevos.length+' nuevos para importar · '+(rows.length-nuevos.length)+' ya están en el sistema.</div></div>';
+ var lista=rows.slice(0,100).map(function(r){var ya=yaImp[r.id_secop];return '<tr><td>'+(ya?'<span class="badge b-ok">Ya está</span>':'<span class="badge b-info">Nuevo</span>')+'</td><td><b>'+esc(r.codigo)+'</b><br><small class="muted">'+esc((r.objeto||'').slice(0,70))+'</small></td><td>'+esc(r.contratista)+'<br><small class="muted">'+esc(r.modalidad)+'</small></td><td class="r num">'+fmt(r.valor)+'<br><small class="muted">pagado '+(r.valor?Math.round(r.ejecutado/r.valor*100):0)+'%</small></td></tr>';}).join('');
+ document.getElementById('secopRes').innerHTML=head+'<div class="tbl-wrap mt"><table><thead><tr><th></th><th>Contrato</th><th>Contratista / modalidad</th><th class="r">Valor / pagado</th></tr></thead><tbody>'+lista+'</tbody></table></div>'+(rows.length>100?'<p class="muted" style="font-size:12px">Mostrando 100 de '+rows.length+'; al importar se traen todos los nuevos.</p>':'')+(nuevos.length?'<div class="mt"><button class="btn btn-verde" onclick="importarSecop()">Importar '+nuevos.length+' contratos nuevos</button></div>':'<p class="muted mt">Todos estos contratos ya están cargados.</p>');
+}
+async function importarSecop(){
+ var rows=window.__secop||[];var yaImp={};contratos.forEach(function(c){if(c.idSecop)yaImp[c.idSecop]=1;});
+ var nuevos=rows.filter(function(r){return !yaImp[r.id_secop];});
+ if(!nuevos.length){toast('No hay contratos nuevos.');return;}
+ await insertarContratos(nuevos,'SECOP');
+}
+var COLS_CONTRATO=['codigo','objeto','contratista','nit_contratista','interventor','ced_interventor','int_aprobo','ordenador','ced_ordenador','valor','ejecutado','fin','tiene_poliza','fin_poliza','otrosi','anticipo','anticipo_amort','modalidad','tipo','estado','url_secop','rep_legal','ced_rep_legal','fuente','id_secop','dias_adic'];
+function crearProyectoDe(f){ // ¿se crea proyecto (avance) para este contrato?
+ if(f.fuente==='csv')return true; if(/prestaci/i.test(f.tipo||''))return false; return true; }
+async function insertarContratos(filas,origen){
+ if(DEMO){
+  filas.forEach(function(f){var row={};for(var k in f)row[k]=f[k];row.creado=hoyISO;contratos.push(mapContrato(row));if(crearProyectoDe(f)&&f.valor>0){var fin=Math.round((f.ejecutado||0)/f.valor*100);var fis=(f.__fis!=null?f.__fis:fin);proyectos[f.codigo]={nombre:(f.objeto||'').slice(0,60),fisico:fis,financiero:fin};}});
+  log('Importó '+filas.length+' contratos ('+origen+')');toast('✓ '+filas.length+' contratos importados ('+origen+'). Ajuste el avance físico de las obras en Proyectos.');ir('contratos');return;
+ }
+ try{
+  var ins=[];
+  for(var i=0;i<filas.length;i+=100){
+   var parte=filas.slice(i,i+100).map(function(f){var db={entidad_id:ENTIDAD_ID};COLS_CONTRATO.forEach(function(k){if(f[k]!==undefined&&f[k]!==null&&f[k]!=='')db[k]=f[k];});return db;});
+   var r=await q(N().from('contrato').insert(parte).select());ins=ins.concat(r||[]);
+  }
+  var byCod={};filas.forEach(function(f){byCod[f.codigo]=f;});
+  var proy=[];ins.forEach(function(r){var f=byCod[r.codigo]||{};if(crearProyectoDe(f)&&(+r.valor)>0){var fin=Math.round((+r.ejecutado||0)/(+r.valor)*100);var fis=(f.__fis!=null?f.__fis:fin);proy.push({entidad_id:ENTIDAD_ID,contrato_id:r.id,nombre:(r.objeto||'').slice(0,60),fisico:fis,financiero:fin,presupuesto:+r.valor});}});
+  for(var j=0;j<proy.length;j+=100){await q(N().from('proyecto').insert(proy.slice(j,j+100)).select());}
+  log('Importó '+ins.length+' contratos ('+origen+')');
+  await cargarDatos();toast('✓ '+ins.length+' contratos importados ('+origen+'). Ajuste el avance físico de las obras en Proyectos.');ir('contratos');
+ }catch(e){toast('No se pudo importar: '+trad(e));}
+}
+function plantillaCsv(){var h='codigo,objeto,contratista,nit,interventor,ced_interventor,ordenador,valor,ejecutado,fin,poliza,anticipo,fisico\n';var ej='C-2026-001,Construccion de parque,Constructora Ejemplo SAS,900123456,Laura Perez,22333444,Juan Gomez,150000000,60000000,2026-12-31,si,0,30\n';var blob=new Blob(["﻿"+h+ej],{type:'text/csv;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='plantilla-auditor-ia.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(a.href);},1500);toast('Plantilla descargada');}
+function onCsvFile(ev){var f=ev.target.files&&ev.target.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(){try{var filas=parseCSV(String(rd.result));if(!filas.length){document.getElementById('csvRes').innerHTML='<div class="card panel" style="background:var(--amarillo-bg);border-color:#EAD9A6">No se leyeron filas válidas. Revise que tenga las columnas y que código, objeto, contratista y valor estén llenos.</div>';return;}window.__csv=filas;document.getElementById('csvRes').innerHTML='<div class="pay-state" style="background:var(--verde-suave);color:var(--texto)"><div class="big" style="color:var(--verde-osc)">'+filas.length+' filas leídas</div></div><div class="mt"><button class="btn btn-verde" onclick="importarCsv()">Importar '+filas.length+' contratos</button></div>';}catch(e){document.getElementById('csvRes').innerHTML='<div class="card panel" style="background:var(--rojo-bg);border-color:#E7B7B0">No se pudo leer el CSV: '+esc(e.message||String(e))+'</div>';}};rd.readAsText(f,'utf-8');ev.target.value='';}
+function parseCSV(txt){
+ txt=txt.replace(/^﻿/,'').replace(/\r\n?/g,'\n');
+ var rows=[],row=[],cur='',qq=false;
+ for(var i=0;i<txt.length;i++){var ch=txt[i];
+  if(qq){if(ch==='"'){if(txt[i+1]==='"'){cur+='"';i++;}else qq=false;}else cur+=ch;}
+  else{if(ch==='"')qq=true;else if(ch===',')  {row.push(cur);cur='';}else if(ch===';'&&row.length===0&&rows.length===0){row.push(cur);cur='';}else if(ch==='\n'){row.push(cur);rows.push(row);row=[];cur='';}else cur+=ch;}
+ }
+ if(cur!==''||row.length){row.push(cur);rows.push(row);}
+ if(rows.length<2)return [];
+ var norm=function(s){return String(s||'').trim().toLowerCase().replace(/[áä]/g,'a').replace(/[éë]/g,'e').replace(/[íï]/g,'i').replace(/[óö]/g,'o').replace(/[úü]/g,'u');};
+ var head=rows[0].map(norm);
+ var idx=function(names){for(var k=0;k<names.length;k++){var p=head.indexOf(names[k]);if(p>=0)return p;}return -1;};
+ var M={codigo:idx(['codigo','contrato','referencia']),objeto:idx(['objeto','descripcion']),contratista:idx(['contratista','proveedor']),nit:idx(['nit','nit_contratista','documento','cedula']),interv:idx(['interventor','supervisor']),cedint:idx(['ced_interventor','cedint','cedula_interventor']),orden:idx(['ordenador','ordenador_del_gasto']),valor:idx(['valor','valor_del_contrato']),ejec:idx(['ejecutado','pagado','valor_pagado']),fin:idx(['fin','fecha_fin','terminacion']),pol:idx(['poliza','tiene_poliza']),ant:idx(['anticipo']),fis:idx(['fisico','avance_fisico'])};
+ var out=[],num=function(s){return parseFloat(String(s||'').replace(/[^\d.-]/g,''))||0;};
+ for(var r2=1;r2<rows.length;r2++){var c=rows[r2];if(!c.length||c.join('').trim()==='')continue;
+  var g=function(k){return M[k]>=0?String(c[M[k]]||'').trim():'';};
+  var cod=g('codigo'),obj=g('objeto'),con=g('contratista'),val=num(g('valor'));
+  if(!cod||!obj||!con||!val)continue;
+  var o={codigo:cod,objeto:obj.slice(0,500),contratista:con,nit_contratista:g('nit')||'—',interventor:g('interv'),ced_interventor:g('cedint'),ordenador:g('orden'),valor:val,ejecutado:num(g('ejec')),fin:(g('fin')||'').slice(0,10)||null,tiene_poliza:/^(si|sí|s|true|1|x|verdadero)$/i.test(g('pol')),anticipo:num(g('ant')),fuente:'csv',tipo:'Obra'};
+  if(M.fis>=0&&g('fis')!=='')o.__fis=Math.max(0,Math.min(100,num(g('fis'))));
+  out.push(o);
+ }
+ return out;
+}
+async function importarCsv(){var filas=window.__csv||[];if(!filas.length){toast('Primero cargue un archivo.');return;}var ya={};contratos.forEach(function(c){ya[c.id]=1;});var nuevos=filas.filter(function(f){return !ya[f.codigo];});if(!nuevos.length){toast('Esos contratos ya están cargados.');return;}await insertarContratos(nuevos,'CSV');}
+
+/* ===================== Importar: pantalla ===================== */
+RENDER.importar=function(){
+ var nit=nitDigits(EMPRESA.nit);var anioDef=(new Date().getFullYear()-1);
+ return '<div class="view-head"><div><h2>Importar datos</h2><p>Traiga sus contratos reales desde SECOP o desde una hoja de cálculo, sin digitarlos uno por uno.</p></div></div>'+
+  fuente('SECOP es el sistema oficial de contratación pública de Colombia (datos abiertos). Auditor-IA consulta los contratos de su entidad por el NIT y los trae con su valor, lo pagado, el supervisor y el enlace al expediente. <b>Lo pagado viene de SECOP: el proveedor no lo puede maquillar.</b>')+
+  '<div class="card panel mb"><h3>1) Conectar con SECOP</h3><div class="sub">Trae los contratos electrónicos (SECOP II) de su entidad.</div><div class="form-grid mt">'+
+   '<div class="field"><label>NIT de la entidad (sin dígito de verificación)</label><input id="secNit" value="'+esc(nit)+'" placeholder="891780009"></div>'+
+   '<div class="field"><label>Traer contratos desde el año</label><input id="secAnio" type="number" min="2015" max="2031" value="'+anioDef+'"></div>'+
+  '</div><div class="mt"><button class="btn btn-primary" style="width:auto" onclick="buscarSecop()">Buscar en SECOP</button></div><div id="secopRes" class="mt"></div></div>'+
+  '<div class="card panel"><h3>2) Importar desde Excel / CSV</h3><div class="sub">Si tiene sus contratos en una hoja de cálculo, guárdela como CSV y cárguela aquí.</div>'+
+   '<p class="muted" style="font-size:12.5px;margin:8px 0">Columnas (la primera fila son los títulos): <b>codigo, objeto, contratista, nit, interventor, ced_interventor, ordenador, valor, ejecutado, fin, poliza, anticipo, fisico</b>. Solo <i>codigo, objeto, contratista y valor</i> son obligatorios.</p>'+
+   '<div class="row-inline mt"><button class="btn btn-ghost btn-sm" onclick="plantillaCsv()">Descargar plantilla</button><label class="btn btn-verde btn-sm" style="width:auto;cursor:pointer;margin:0">Elegir archivo CSV<input type="file" accept=".csv,text/csv" id="csvFile" style="display:none" onchange="onCsvFile(event)"></label></div>'+
+   '<div id="csvRes" class="mt"></div></div>';
+};
+
+/* ===================== OLA 2 ===================== */
+function jsq(s){return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
+
+/* ---------- Evidencia (enlaces y soportes) ---------- */
+function evidenciaCard(ambito,ref){
+ var evs=evidencias.filter(function(e){return e.ambito===ambito&&e.ref===ref;});
+ var rows=evs.length?evs.map(function(e){return '<div class="bit-row"><div><b>'+esc(e.descripcion)+'</b>'+(e.url?' — <a href="'+esc(e.url)+'" target="_blank" rel="noopener">abrir enlace</a>':'')+'<div class="meta" style="font-size:11.5px">'+(e.t||'')+'</div></div><button class="btn btn-ghost btn-sm" onclick="quitarEvidencia(\''+e._uuid+'\')">Quitar</button></div>';}).join(''):'<div class="bit-row muted">Sin evidencia adjunta.</div>';
+ var fid='ev_'+slug(ambito+'_'+ref);
+ return '<div class="card panel no-print" style="margin-top:14px"><h3>Evidencia y soportes</h3><div class="sub">Adjunte el enlace a la prueba (acta, foto en Drive, informe, factura). Queda para el informe y la auditoría.</div>'+rows+
+  '<div class="form-grid mt"><div class="field"><label>Descripción</label><input id="'+fid+'_d" placeholder="Ej. Acta de obra del 30 de septiembre"></div><div class="field"><label>Enlace (opcional)</label><input id="'+fid+'_u" placeholder="https://..."></div></div>'+
+  '<div class="mt"><button class="btn btn-verde btn-sm" onclick="agregarEvidencia(\''+ambito+'\',\''+jsq(ref)+'\',\''+fid+'\')">Adjuntar evidencia</button></div></div>';
+}
+async function agregarEvidencia(ambito,ref,fid){var d=gv(fid+'_d').trim();if(!d){toast('Escriba la descripción.');return;}var u=gv(fid+'_u').trim();var e={ambito:ambito,ref:ref,descripcion:d,url:u,t:hoyISO};
+ if(DEMO){e._uuid='e'+Date.now();evidencias.push(e);log('Adjuntó evidencia a '+ref);toast('✓ Evidencia adjunta');repintar();return;}
+ try{var ins=await q(N().from('evidencia').insert({entidad_id:ENTIDAD_ID,ambito:ambito,ref:ref,descripcion:d,url:u}).select());if(ins&&ins[0])e._uuid=ins[0].id;evidencias.push(e);log('Adjuntó evidencia a '+ref);toast('✓ Evidencia adjunta');repintar();}catch(x){toast('No se pudo: '+trad(x));}
+}
+async function quitarEvidencia(id){
+ if(DEMO){evidencias=evidencias.filter(function(x){return x._uuid!==id;});toast('Quitada');repintar();return;}
+ try{await q(N().from('evidencia').delete().eq('id',id));evidencias=evidencias.filter(function(x){return x._uuid!==id;});toast('Quitada');repintar();}catch(e){toast('No se pudo: '+trad(e));}
+}
+
+/* ---------- Beneficiario final / redes ---------- */
+function redesData(){
+ var porRep={};
+ contratos.forEach(function(c){var k=(c.cedRep&&c.cedRep!=='—')?c.cedRep:null;if(!k)return;var g=porRep[k]=porRep[k]||{rep:c.repLegal,ced:c.cedRep,contratistas:{},ids:[],total:0};g.contratistas[c.nitCont]=c.contratista;g.ids.push(c.id);g.total+=c.valor;});
+ var reps=Object.keys(porRep).map(function(k){var g=porRep[k];g.nContratistas=Object.keys(g.contratistas).length;return g;}).filter(function(g){return g.nContratistas>=2||g.ids.length>=3;}).sort(function(a,b){return b.total-a.total;});
+ var vinc=[];contratos.forEach(function(c){if(c.cedRep&&c.cedRep!=='—'&&(c.cedRep===c.cedInt||c.cedRep===c.cedOrd))vinc.push(c);});
+ return {reps:reps,vinc:vinc};
+}
+RENDER.redes=function(){
+ var d=redesData();
+ var repsHtml=d.reps.length?d.reps.map(function(g){return '<div class="ficha"><div class="cab"><div><b>'+esc(g.rep)+'</b><div class="ced">Representante legal · CC '+esc(g.ced)+' · '+g.nContratistas+' contratista(s) · '+g.ids.length+' contrato(s)</div></div><span class="badge '+(g.nContratistas>=2?'b-naranja':'b-info')+'">'+fmt(g.total)+'</span></div><div class="mini">Empresas: '+esc(Object.keys(g.contratistas).map(function(n){return g.contratistas[n];}).join(', '))+'</div>'+(g.nContratistas>=2?'<div class="mini" style="color:var(--rojo);font-weight:600;margin-top:6px">⚠️ Un mismo representante legal detrás de varias empresas contratistas: posible red o testaferrato. Verificar.</div>':'')+'</div>';}).join(''):'<div class="ficha muted">No se detectan representantes legales compartidos entre contratistas. (Este cruce usa el representante legal que trae SECOP.)</div>';
+ var vincHtml=d.vinc.length?d.vinc.map(function(c){return '<div class="ficha"><div class="cab"><div><b>'+esc(c.contratista)+'</b><div class="ced">Contrato '+esc(c.id)+'</div></div><span class="badge b-rojo">⛔ Conflicto</span></div><div class="mini">El representante legal (CC '+esc(c.cedRep)+') es también '+(c.cedRep===c.cedInt?'el interventor/supervisor':'el ordenador del gasto')+' del contrato.</div></div>';}).join(''):'<div class="ficha muted">Sin coincidencias entre representante legal e interventor/ordenador.</div>';
+ return '<div class="view-head"><div><h2>Beneficiario final y redes</h2><p>Relaciones ocultas entre contratistas, representantes legales, interventores y ordenadores.</p></div></div>'+
+  fuente('Se arma con el <b>representante legal</b> que trae SECOP para cada contratista. Un mismo representante detrás de varias empresas, o que además es interventor u ordenador, es una señal de posible red de contratación. Son indicios por verificar, no acusaciones.')+
+  '<div class="card mb"><div class="panel"><h3>Representantes legales compartidos</h3><div class="sub">Una misma persona como representante de varios contratistas.</div></div><div style="padding:0 16px 10px">'+repsHtml+'</div></div>'+
+  '<div class="card"><div class="panel"><h3>Representante legal que también controla</h3><div class="sub">El representante del contratista aparece como interventor u ordenador.</div></div><div style="padding:0 16px 10px">'+vincHtml+'</div></div>';
+};
+
+/* ---------- Canal de denuncias ---------- */
+RENDER.denuncias=function(){
+ var est={nueva:['Nueva','b-rojo'],revisada:['Revisada','b-naranja'],archivada:['Archivada','b-ok']};
+ var rows=denuncias.length?denuncias.map(function(d){var e=est[d.estado]||est.nueva;return '<div class="alert-row"><div class="ic ic-'+(d.estado==='archivada'?'ok':d.estado==='revisada'?'naranja':'rojo')+'">📣</div><div class="bd"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>'+esc(d.asunto)+'</b><span class="badge '+e[1]+'">'+e[0]+'</span>'+(d.anonima?'<span class="badge b-info">Anónima</span>':'')+'</div><p>'+esc(d.detalle||'')+'</p><div class="meta">'+(d.contrato?'Contrato: '+esc(d.contrato)+' · ':'')+(d.contacto?'Contacto: '+esc(d.contacto)+' · ':'')+(d.t||'')+'</div><div class="acc no-print"><button class="btn btn-ghost btn-sm" onclick="estadoDenuncia(\''+d._uuid+'\',\'revisada\')">Marcar revisada</button><button class="btn btn-ghost btn-sm" onclick="estadoDenuncia(\''+d._uuid+'\',\'archivada\')">Archivar</button></div></div></div>';}).join(''):'<div class="alert-row"><div class="ic ic-ok">✓</div><div class="bd"><b>Sin denuncias registradas</b></div></div>';
+ return '<div class="view-head"><div><h2>Canal de denuncias</h2><p>Registre y haga seguimiento a las alertas de la ciudadanía o de los funcionarios.</p></div></div>'+
+  fuente('Aquí se registran las denuncias recibidas por cualquier medio; quedan trazables y pueden convertirse en hallazgos. En producción se puede habilitar un enlace público anónimo para que la ciudadanía reporte directamente (Ley 1712 de transparencia).')+
+  '<div class="card mb">'+rows+'</div>'+
+  '<div class="card panel no-print"><h3>Registrar denuncia</h3><div class="form-grid mt">'+
+   '<div class="field full"><label>Asunto *</label><input id="de_asunto" placeholder="Qué se reporta"></div>'+
+   '<div class="field full"><label>Detalle</label><input id="de_detalle" placeholder="Describa lo reportado"></div>'+
+   '<div class="field"><label>Contrato referido (opcional)</label><input id="de_contrato" placeholder="C-2026-014"></div>'+
+   '<div class="field"><label>Contacto (opcional)</label><input id="de_contacto" placeholder="Si no es anónima"></div>'+
+  '</div><div class="mt"><button class="btn btn-verde" onclick="agregarDenuncia()">Registrar denuncia</button></div></div>';
+};
+async function agregarDenuncia(){var a=gv('de_asunto').trim();if(!a){toast('Escriba el asunto.');return;}var contacto=gv('de_contacto').trim();var d={asunto:a,detalle:gv('de_detalle').trim(),contrato:gv('de_contrato').trim(),contacto:contacto,anonima:!contacto,estado:'nueva',t:hoyISO};
+ if(DEMO){d._uuid='d'+Date.now();denuncias.unshift(d);log('Registró denuncia: '+a);toast('✓ Denuncia registrada');repintar();return;}
+ try{var ins=await q(N().from('denuncia').insert({entidad_id:ENTIDAD_ID,asunto:d.asunto,detalle:d.detalle,contrato:d.contrato,contacto:d.contacto,anonima:d.anonima,estado:'nueva'}).select());if(ins&&ins[0])d._uuid=ins[0].id;denuncias.unshift(d);log('Registró denuncia: '+a);toast('✓ Denuncia registrada');repintar();}catch(e){toast('No se pudo: '+trad(e));}
+}
+async function estadoDenuncia(id,est){var d=denuncias.find(function(x){return x._uuid===id;});if(!d)return;
+ if(DEMO){d.estado=est;log('Denuncia '+est);toast('✓ Actualizada');repintar();return;}
+ try{await q(N().from('denuncia').update({estado:est}).eq('id',id));d.estado=est;log('Denuncia '+est);toast('✓ Actualizada');repintar();}catch(e){toast('No se pudo: '+trad(e));}
+}
+
+/* ---------- Plan Anual de Auditoría ---------- */
+RENDER.plan=function(){
+ var rc={alto:'b-rojo',medio:'b-naranja',bajo:'b-ok'};var ec={planeada:'Planeada',en_curso:'En curso',terminada:'Terminada'};
+ var rows=planAnual.length?planAnual.map(function(p){return '<tr><td><b>'+esc(p.tema)+'</b><br><small class="muted">'+esc(p.periodo||'')+(p.responsable?' · '+esc(p.responsable):'')+'</small></td><td>'+p.anio+'</td><td><span class="badge '+(rc[p.riesgo]||'b-info')+'">'+esc(p.riesgo)+'</span></td><td>'+(ec[p.estado]||p.estado)+'</td><td class="no-print"><button class="btn btn-ghost btn-sm" onclick="quitarPlan(\''+p._uuid+'\')">Quitar</button></td></tr>';}).join(''):'<tr><td colspan="5" class="muted">Sin temas en el plan todavía.</td></tr>';
+ return '<div class="view-head"><div><h2>Plan Anual de Auditoría</h2><p>El plan que la Oficina de Control Interno formula y ejecuta cada año.</p></div></div>'+
+  fuente('Alineado con el modelo de las <b>tres líneas de defensa</b> y el MECI. Cada tema se prioriza por riesgo; conviene auditar primero lo que más banderas rojas tiene. Sirve de soporte para la rendición de cuentas a la Contraloría.')+
+  '<div class="tbl-wrap mb"><table><thead><tr><th>Tema / proceso</th><th>Año</th><th>Riesgo</th><th>Estado</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+  '<div class="card panel no-print"><h3>Agregar tema al plan</h3><div class="form-grid mt">'+
+   '<div class="field full"><label>Tema o proceso a auditar *</label><input id="pl_tema" placeholder="Ej. Contratación de obra pública"></div>'+
+   '<div class="field"><label>Año</label><input id="pl_anio" type="number" value="'+(new Date().getFullYear())+'"></div>'+
+   '<div class="field"><label>Riesgo</label><select id="pl_riesgo"><option value="alto">Alto</option><option value="medio" selected>Medio</option><option value="bajo">Bajo</option></select></div>'+
+   '<div class="field"><label>Periodo</label><input id="pl_periodo" placeholder="IV trimestre"></div>'+
+   '<div class="field"><label>Responsable</label><input id="pl_resp" placeholder="Nombre y cargo"></div>'+
+  '</div><div class="mt"><button class="btn btn-verde" onclick="agregarPlan()">Agregar al plan</button></div></div>';
+};
+async function agregarPlan(){var t=gv('pl_tema').trim();if(!t){toast('Escriba el tema.');return;}var p={anio:parseInt(gv('pl_anio'))||new Date().getFullYear(),tema:t,riesgo:gv('pl_riesgo'),periodo:gv('pl_periodo').trim(),responsable:gv('pl_resp').trim(),estado:'planeada'};
+ if(DEMO){p._uuid='p'+Date.now();planAnual.push(p);log('Plan: agregó '+t);toast('✓ Agregado al plan');repintar();return;}
+ try{var ins=await q(N().from('plan_auditoria').insert({entidad_id:ENTIDAD_ID,anio:p.anio,tema:p.tema,riesgo:p.riesgo,periodo:p.periodo,responsable:p.responsable,estado:'planeada'}).select());if(ins&&ins[0])p._uuid=ins[0].id;planAnual.push(p);log('Plan: agregó '+t);toast('✓ Agregado al plan');repintar();}catch(e){toast('No se pudo: '+trad(e));}
+}
+async function quitarPlan(id){
+ if(DEMO){planAnual=planAnual.filter(function(x){return x._uuid!==id;});toast('Quitado');repintar();return;}
+ try{await q(N().from('plan_auditoria').delete().eq('id',id));planAnual=planAnual.filter(function(x){return x._uuid!==id;});toast('Quitado');repintar();}catch(e){toast('No se pudo: '+trad(e));}
+}
+
+/* ---------- Multientidad (consolidado) ---------- */
+var MULTI=null;
+RENDER.multientidad=function(){
+ if(!(SUPER||EMPRESA.alcance==='varias')){
+  return '<div class="view-head"><div><h2>Multientidad</h2><p>Vista consolidada para órganos de control que vigilan varias entidades.</p></div></div>'+fuente('Esta vista es para contralorías, personerías u oficinas que auditan <b>varias entidades</b>. Su cuenta está configurada para una sola; si audita varias, actívelo en Parametrización → Alcance.')+'<div class="card panel"><p class="muted">Sin entidades adicionales para consolidar.</p></div>';
+ }
+ if(MULTI===null){cargarMultientidad();return '<div class="view-head"><div><h2>Multientidad</h2></div></div><div class="card panel"><p class="sub">Cargando entidades…</p></div>';}
+ var tot=MULTI.reduce(function(s,e){return s+e.valor;},0);
+ var rows=MULTI.map(function(e){return '<tr><td><b>'+esc(e.nombre)+'</b><br><small class="muted">'+esc(e.tipo||'')+'</small></td><td class="num">'+e.n+'</td><td class="r num">'+fmt(e.valor)+'</td><td class="r num">'+(e.riesgo?fmt(e.riesgo):'$0')+'</td></tr>';}).join('');
+ return '<div class="view-head"><div><h2>Multientidad — consolidado</h2><p>Todas las entidades que usted vigila, en una sola mirada.</p></div></div>'+
+  fuente('Consolida los contratos de todas las entidades a las que usted tiene acceso. El "en riesgo" es el valor pagado por encima del avance en cada entidad.')+
+  '<div class="grid kpis mb">'+kpi('azul',MULTI.length,'Entidades vigiladas','')+kpi('verde',MULTI.reduce(function(s,e){return s+e.n;},0),'Contratos','en total')+kpi('azul',fmt(tot),'Valor consolidado','')+'</div>'+
+  '<div class="tbl-wrap"><table><thead><tr><th>Entidad</th><th>Contratos</th><th class="r">Valor</th><th class="r">En riesgo</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+};
+async function cargarMultientidad(){
+ if(DEMO){MULTI=[{nombre:EMPRESA.nombre,tipo:EMPRESA.tipo,n:contratos.length,valor:contratos.reduce(function(s,c){return s+c.valor;},0),riesgo:0}];repintar();return;}
+ try{
+  var ents=await q(N().from('entidad').select('*'));ents=ents||[];
+  var cs=await q(N().from('contrato').select('entidad_id,valor,ejecutado'));cs=cs||[];
+  var ps=await q(N().from('proyecto').select('entidad_id,fisico,financiero,presupuesto'));ps=ps||[];
+  var agg={};ents.forEach(function(e){agg[e.id]={nombre:e.nombre,tipo:e.tipo,n:0,valor:0,riesgo:0};});
+  cs.forEach(function(c){var a=agg[c.entidad_id];if(a){a.n++;a.valor+=(+c.valor||0);}});
+  ps.forEach(function(p){var a=agg[p.entidad_id];if(a){var d=(p.financiero-p.fisico);if(d>=12)a.riesgo+=Math.round((+p.presupuesto||0)*d/100);}});
+  MULTI=Object.keys(agg).map(function(k){return agg[k];}).sort(function(a,b){return b.valor-a.valor;});
+  repintar();
+ }catch(e){MULTI=[];repintar();}
+}
+</script>
+
+<!-- ================= CONEXIÓN NEON (login + datos reales) ================= -->
+<script type="module">
+  import { createClient } from "https://esm.sh/@neondatabase/neon-js@0.7.0-beta";
+  const AUTH = "https://ep-summer-leaf-b49f7wcn.neonauth.c-6.us-east-2.aws.neon.tech/neondb/auth";
+  const DATA = "https://ep-summer-leaf-b49f7wcn.apirest.c-6.us-east-2.aws.neon.tech/neondb/rest/v1";
+  try {
+    window.NEON = createClient({ auth: { url: AUTH }, dataApi: { url: DATA } });
+  } catch (e) { console.error("No se pudo iniciar Neon:", e); }
+  // El SDK ya está listo; arrancamos la app (definida en el script clásico de arriba).
+  if (window.arranque) window.arranque();
+  else window.addEventListener("DOMContentLoaded", function(){ window.arranque && window.arranque(); });
+</script>
+</body>
+</html>
