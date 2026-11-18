@@ -229,8 +229,8 @@ var ROLES={control:'Dirección / Control interno',ejecutor:'Ejecutor (secretarí
 /* Menús por rol: cada rol ve pestañas distintas */
 var TABS_ROL={
   control:    ['tablero','impacto','multientidad','importar','contratos','proyectos','cruces','redes','banderas','interventoria','hallazgos','denuncias','plan','cyber','vencimientos','bitacora','informe','usuarios','admin'],
-  ejecutor:   ['tablero','importar','contratos','proyectos','interventoria','hallazgos','denuncias','cyber','vencimientos','informe','usuarios','admin'],
-  contratante:['tablero','impacto','contratos','proyectos','cruces','redes','hallazgos','vencimientos','informe','usuarios','admin'],
+  ejecutor:   ['tablero','importar','contratos','proyectos','interventoria','hallazgos','denuncias','cyber','vencimientos','informe'],
+  contratante:['tablero','impacto','contratos','proyectos','cruces','redes','hallazgos','vencimientos','informe'],
   interventor:['tablero','proyectos','interventoria','hallazgos','vencimientos','informe'],
   auditor:    ['tablero','impacto','multientidad','contratos','proyectos','cruces','redes','banderas','hallazgos','denuncias','plan','cyber','vencimientos','bitacora','informe']
 };
@@ -402,7 +402,7 @@ async function cargarTodo(){try{
  var s=await N().auth.getSession();var u=s&&s.data&&s.data.user;if(!u){pantallaLogin();return;}
  UID=u.id;usuarioNombre=(u.name||u.email||'');
  SUPER=false;try{SUPER=!!(await rpc('soy_superadmin'));}catch(e){}
- var mem=await q(N().from('usuario_entidad').select('*'));mem=mem||[];
+ var mem=await q(N().from('usuario_entidad').select('*').eq('user_id',UID));mem=mem||[];
  if(!mem.length&&!SUPER){pantallaActivar();return;}
  if(!mem.length&&SUPER){ROL='control';EMPRESA={nombre:'SkyNet Genesis (superadmin)',nit:'',tipo:'Otra',alcance:'una',numEnt:1,pagadoHasta:null,pruebaHasta:null,moduloCiber:true,_id:null};ENTIDAD_ID=null;contratos=[];proyectos={};checklist=[];cyberQ=PREGUNTAS_CYBER.map(function(p){return {q:p.q,m:p.m,a:'no',_uuid:null};});usuarios=[];seg={};bitacora=[];abrirApp();return;}
  var m=mem[0];ENTIDAD_ID=m.entidad_id;ROL=m.rol||'ejecutor';
@@ -437,7 +437,7 @@ var ICON={tablero:'📊',impacto:'🎯',multientidad:'🏛️',importar:'📥',c
 function tabsPermitidas(){return TABS_ROL[ROL]||['tablero'];}
 function pintarMenu(){var cont=document.getElementById('side');cont.innerHTML='';var perm=tabsPermitidas();SECCIONES.forEach(function(s){var items=s.items.filter(function(id){return perm.indexOf(id)>=0;});if(!items.length)return;var g=document.createElement('div');g.className='grp';g.textContent=s.t;cont.appendChild(g);items.forEach(function(id){var b=document.createElement('button');b.className='item'+(id===vista?' active':'');b.id='nav-'+id;b.innerHTML='<span class="ico">'+(ICON[id]||'•')+'</span><span>'+TABNOM[id]+'</span>';b.onclick=function(){ir(id);};cont.appendChild(b);});});}
 function toggleMenu(force){var on=(typeof force==='boolean')?force:!document.body.classList.contains('menu');document.body.classList.toggle('menu',on);}
-function ir(id){if(tabsPermitidas().indexOf(id)<0)id='tablero';vista=id;contratoVista='lista';document.querySelectorAll('.side .item').forEach(function(t){t.classList.remove('active');});var a=document.getElementById('nav-'+id);if(a)a.classList.add('active');document.getElementById('views').innerHTML=RENDER[id]();toggleMenu(false);window.scrollTo({top:0,behavior:'smooth'});}
+function ir(id){if(tabsPermitidas().indexOf(id)<0)id='tablero';vista=id;contratoVista='lista';document.querySelectorAll('.side .item').forEach(function(t){t.classList.remove('active');});var a=document.getElementById('nav-'+id);if(a)a.classList.add('active');document.getElementById('views').innerHTML=vistaConCobro(id);toggleMenu(false);window.scrollTo({top:0,behavior:'smooth'});}
 
 var RENDER={};
 function luces(sev){return '<span class="luces"><span class="luz l-rojo" style="opacity:'+(sev==='rojo'?1:.18)+'"></span><span class="luz l-naranja" style="opacity:'+(sev==='naranja'?1:.18)+'"></span><span class="luz l-amarillo" style="opacity:'+(sev==='amarillo'?1:.18)+'"></span><span class="luz l-ok" style="opacity:'+(sev==='ok'?1:.18)+'"></span></span>';}
@@ -516,7 +516,24 @@ function agregarContrato(){
  contratos.push(c);if(fis||finp)proyectos[id]={nombre:obj,fisico:fis,financiero:finp};
  log('Registró el contrato '+id);toast('✓ Contrato '+id+' registrado y analizado.');contratoVista='lista';repintar();
 }
-function repintar(){document.getElementById('views').innerHTML=RENDER[vista]();window.scrollTo({top:0,behavior:'smooth'});}
+function cobroBanner(est){var rojo=est.key==='cerrada';var bg=rojo?'#B42318':'#B54708';
+ return '<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:'+bg+';color:#fff;border-radius:12px;padding:12px 16px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.12)">'+
+  '<div style="font-size:22px">⚠️</div>'+
+  '<div style="flex:1;min-width:200px"><b style="display:block">'+(rojo?'Acceso cerrado por falta de pago':'Pago pendiente'+(est.dias?' · le queda'+(est.dias===1?'':'n')+' '+est.dias+' día'+(est.dias===1?'':'s'):''))+'</b><span style="font-size:13px;opacity:.95">'+esc(est.msg)+'</span></div>'+
+  '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-sm" style="width:auto;background:#fff;color:'+bg+';font-weight:700" onclick="pagarBold()">Pagar con Bold</button>'+
+  '<a class="btn btn-sm" style="width:auto;background:#1F8A4C;color:#fff;display:inline-flex;align-items:center" href="https://wa.me/573044375758" target="_blank" rel="noopener">WhatsApp</a></div></div>';
+}
+function pantallaBloqueo(est){
+ return '<div class="card panel" style="text-align:center;padding:40px 22px"><div style="font-size:40px">🔒</div><h2 style="margin:10px 0 6px">Acceso cerrado por falta de pago</h2><p class="muted" style="max-width:520px;margin:0 auto 14px">'+esc(est.msg)+' Para reactivarlo, realice el pago con Bold. Apenas Bold confirme, el acceso se restablece de inmediato y toda su información sigue intacta.</p><div class="row-inline" style="justify-content:center;gap:10px"><button class="btn btn-primary" style="width:auto" onclick="pagarBold()">Pagar ahora con Bold</button><a class="btn btn-verde" style="width:auto;display:inline-flex;align-items:center;justify-content:center" href="https://wa.me/573044375758" target="_blank" rel="noopener">Hablar por WhatsApp</a></div><p class="muted" style="font-size:12px;margin-top:14px">Soporte: contacto@skynetgenesis.com · WhatsApp 3044375758</p></div>';
+}
+function vistaConCobro(id){
+ var est={key:'activa'};try{est=estadoPago();}catch(e){}
+ var mostrar=(!DEMO&&!SUPER&&(est.key==='aviso'||est.key==='cerrada'));
+ var banner=mostrar?cobroBanner(est):'';
+ if(!DEMO&&!SUPER&&est.key==='cerrada'&&id!=='admin'){return banner+pantallaBloqueo(est);}
+ return banner+RENDER[id]();
+}
+function repintar(){document.getElementById('views').innerHTML=vistaConCobro(vista);window.scrollTo({top:0,behavior:'smooth'});}
 
 RENDER.proyectos=function(){
  return '<div class="view-head"><div><h2>Avance de proyectos</h2><p>Avance físico (obra real) contra avance financiero (lo pagado). La alarma central contra el desvío de recursos.</p></div></div>'+
@@ -653,7 +670,7 @@ RENDER.admin=function(){
    (EMPRESA.alcance==='varias'?'<div class="field"><label>N° de entidades a auditar</label><input type="number" min="1" value="'+EMPRESA.numEnt+'" onchange="setParam(\'numEnt\',this.value)"></div>':'')+
   '</div></div>'+
   '<div class="card panel mb"><h3>Su precio</h3><div class="pay-state" style="background:var(--azul-suave)"><div class="big" style="color:var(--azul)">'+pr.titulo+'</div><div style="font-size:13.5px">'+pr.detalle+'</div></div><p class="muted" style="font-size:12px;margin-top:8px">'+pr.nota+'</p></div>'+
-  '<div class="card mb"><div class="panel"><h3>Estado de la suscripción</h3><div class="sub">Sin mora: si no paga, el acceso se cierra el día 5 del mes siguiente. Prueba gratis de 15 días. El bloqueo lo aplica el servidor.</div><div class="pay-state '+box+'"><div class="big">'+e.label+'</div><div style="font-size:13.5px">'+e.msg+'</div></div><div class="row-inline mt"><div class="field"><label for="pagHasta">Pagado hasta</label><input type="date" id="pagHasta" value="'+EMPRESA.pagadoHasta+'"></div><button class="btn btn-verde btn-sm" onclick="guardarPago()">Actualizar</button></div></div></div>'+
+  '<div class="card mb"><div class="panel"><h3>Estado de la suscripción</h3><div class="sub">Prueba gratis de 15 días. Desde el vencimiento verá un aviso con los días que le quedan; el acceso se cierra el día 10 del mes siguiente si no se paga. El "Pagado hasta" solo lo mueve un pago de Bold.</div><div class="pay-state '+box+'"><div class="big">'+e.label+'</div><div style="font-size:13.5px">'+e.msg+'</div></div><div class="row-inline mt"><div class="field"><label for="pagHasta">Pagado hasta</label><input type="date" id="pagHasta" value="'+EMPRESA.pagadoHasta+'"></div><button class="btn btn-verde btn-sm" onclick="guardarPago()">Actualizar</button></div></div></div>'+
   '<div class="card"><div class="panel"><h3>Tarifas de referencia</h3><div class="sub">El pago se hace en línea solo con Bold de SkyNet Genesis.</div>'+
    '<div class="llave-box"><div class="kv" style="font-weight:700;color:var(--azul)"><span>Una sola entidad (por N° de contratos)</span><span></span></div><div class="kv"><span>Básico — hasta 25 contratos</span><b>$65M/año</b></div><div class="kv"><span>Profesional — hasta 100</span><b>$130M/año</b></div><div class="kv"><span>Control — ilimitado</span><b>$260M/año</b></div></div>'+
    '<div class="llave-box" style="margin-top:10px"><div class="kv" style="font-weight:700;color:var(--azul)"><span>Multientidad (por entidad auditada / año)</span><span></span></div><div class="kv"><span>1 – 10 entidades</span><b>$45M c/u</b></div><div class="kv"><span>11 – 30</span><b>$35M c/u</b></div><div class="kv"><span>31 – 80</span><b>$28M c/u</b></div><div class="kv"><span>81 – 200</span><b>$22M c/u</b></div><div class="kv"><span>201 – 500 · gobernaciones, contralorías</span><b>$18M c/u</b></div><div class="kv"><span>501+ · Presidencia, ministerios, Contraloría General</span><b>$14M c/u</b></div></div>'+
@@ -672,7 +689,7 @@ function calcPrecio(){
  var c=contratos.length;var plan=c<=25?['Básico',65000000]:c<=100?['Profesional',130000000]:['Control (ilimitado)',260000000];
  return {titulo:plan[0]+' — '+fmt(plan[1])+'/año',detalle:'Una sola entidad ('+EMPRESA.tipo+') con '+c+' contrato(s) cargados. Equivale a '+fmt(Math.round(plan[1]/12))+'/mes.',nota:'El plan sube solo si supera el número de contratos del tramo.'};
 }
-function estadoPago(){var hoy=new Date(hoyISO+'T00:00:00');var ph=new Date(EMPRESA.pagadoHasta+'T00:00:00');if(hoy<=ph)return {key:'activa',label:'Activa',msg:'Suscripción al día. Vence el '+EMPRESA.pagadoHasta+'.'};var cierre=new Date(ph.getFullYear(),ph.getMonth()+1,5);if(hoy<cierre){var d=Math.ceil((cierre-hoy)/86400000);return {key:'aviso',label:'Por pagar',msg:'Pago vencido. Tiene hasta el día 5 ('+d+' día(s)) para pagar con Bold antes de que se cierre el acceso.'};}return {key:'cerrada',label:'Cerrada por pago',msg:'Acceso cerrado por falta de pago. Pague con Bold para reactivar; el bloqueo lo aplica el servidor.'};}
+function estadoPago(){var hoy=new Date(hoyISO+'T00:00:00');var ph=new Date(EMPRESA.pagadoHasta+'T00:00:00');if(hoy<=ph)return {key:'activa',label:'Activa',msg:'Suscripción al día. Vence el '+EMPRESA.pagadoHasta+'.'};var cierre=new Date(ph.getFullYear(),ph.getMonth()+1,10);if(hoy<cierre){var d=Math.ceil((cierre-hoy)/86400000);return {key:'aviso',label:'Pago pendiente',dias:d,msg:'Su suscripción venció. Le queda'+(d===1?'':'n')+' '+d+' día'+(d===1?'':'s')+' para pagar con Bold antes de que se cierre el acceso.'};}return {key:'cerrada',label:'Acceso cerrado por falta de pago',msg:'El acceso quedó cerrado porque la suscripción no se pagó. Su información está guardada; apenas Bold confirme el pago, el acceso se restablece de inmediato.'};}
 function guardarPago(){var v=document.getElementById('pagHasta').value;if(v){EMPRESA.pagadoHasta=v;log('Actualizó "Pagado hasta" a '+v);toast('✓ Fecha actualizada. Acceso restablecido.');repintar();}}
 
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -725,8 +742,8 @@ function estadoPago(){var hoy=new Date(hoyISO+'T00:00:00');
  if(EMPRESA.pruebaHasta&&!EMPRESA.pagadoHasta){var pr=new Date(EMPRESA.pruebaHasta+'T00:00:00');if(hoy<=pr){var dd=Math.ceil((pr-hoy)/86400000);return {key:'activa',label:'Prueba gratis',msg:'Prueba gratuita activa. Vence el '+EMPRESA.pruebaHasta+' ('+dd+' día(s)). Pague con Bold para continuar sin interrupción.'};}}
  if(!EMPRESA.pagadoHasta)return {key:'cerrada',label:'Sin pago',msg:'Aún no hay un pago registrado. Pague con Bold para activar el acceso.'};
  var ph=new Date(EMPRESA.pagadoHasta+'T00:00:00');if(hoy<=ph)return {key:'activa',label:'Activa',msg:'Suscripción al día. Vence el '+EMPRESA.pagadoHasta+'.'};
- var cierre=new Date(ph.getFullYear(),ph.getMonth()+1,5);if(hoy<cierre){var d=Math.ceil((cierre-hoy)/86400000);return {key:'aviso',label:'Por pagar',msg:'Pago vencido. Tiene hasta el día 5 ('+d+' día(s)) para pagar con Bold antes de que se cierre el acceso.'};}
- return {key:'cerrada',label:'Cerrada por pago',msg:'Acceso cerrado por falta de pago. Pague con Bold para reactivar; el bloqueo lo aplica el servidor.'};
+ var cierre=new Date(ph.getFullYear(),ph.getMonth()+1,10);if(hoy<cierre){var d=Math.ceil((cierre-hoy)/86400000);return {key:'aviso',label:'Pago pendiente',dias:d,msg:'Su suscripción venció. Le queda'+(d===1?'':'n')+' '+d+' día'+(d===1?'':'s')+' para pagar con Bold antes de que se cierre el acceso.'};}
+ return {key:'cerrada',label:'Acceso cerrado por falta de pago',msg:'El acceso quedó cerrado porque la suscripción no se pagó. Su información está guardada; apenas Bold confirme el pago, el acceso se restablece de inmediato.'};
 }
 function planActual(){var c=contratos.length;return c<=25?'basico':c<=100?'profesional':'control';}
 function _boldAbrir(d){function go(){try{new window.BoldCheckout({orderId:d.orderId,currency:d.currency,amount:String(d.amount),apiKey:d.apiKey,integritySignature:d.signature,description:d.description||'Auditor-IA',redirectionUrl:d.redirectionUrl||(location.origin+location.pathname)}).open();}catch(e){toast('No se pudo abrir la pasarela de Bold: '+e,'error');}}
@@ -771,7 +788,7 @@ RENDER.admin=function(){
    (EMPRESA.alcance==='varias'?'<div class="field"><label>N° de entidades a auditar</label><input type="number" min="1" value="'+EMPRESA.numEnt+'" onchange="setParam(\'numEnt\',this.value)"></div>':'')+
   '</div></div>'+
   '<div class="card panel mb"><h3>Su precio</h3><div class="pay-state" style="background:var(--azul-suave)"><div class="big" style="color:var(--azul)">'+pr.titulo+'</div><div style="font-size:13.5px">'+pr.detalle+'</div></div><p class="muted" style="font-size:12px;margin-top:8px">'+pr.nota+'</p></div>'+
-  '<div class="card panel mb"><h3>Estado de la suscripción</h3><div class="sub">Sin mora: si no paga, el acceso se cierra el día 5 del mes siguiente. Prueba gratis de 15 días. El bloqueo lo aplica el servidor; el "Pagado hasta" solo lo mueve un pago de Bold.</div><div class="pay-state '+box+'"><div class="big">'+e.label+'</div><div style="font-size:13.5px">'+e.msg+'</div></div><div class="mt"><button class="btn btn-primary" style="width:auto" onclick="pagarBold()">Pagar en línea con Bold</button></div></div>'+
+  '<div class="card panel mb"><h3>Estado de la suscripción</h3><div class="sub">Prueba gratis de 15 días. Desde el vencimiento verá un aviso con los días que le quedan; el acceso se cierra el día 10 del mes siguiente si no se paga. El "Pagado hasta" solo lo mueve un pago de Bold.</div><div class="pay-state '+box+'"><div class="big">'+e.label+'</div><div style="font-size:13.5px">'+e.msg+'</div></div><div class="mt"><button class="btn btn-primary" style="width:auto" onclick="pagarBold()">Pagar en línea con Bold</button></div></div>'+
   '<div class="card"><div class="panel"><h3>Tarifas de referencia</h3><div class="sub">El pago se hace en línea solo con Bold de SkyNet Genesis.</div>'+
    '<div class="llave-box"><div class="kv" style="font-weight:700;color:var(--azul)"><span>Una sola entidad (por N° de contratos)</span><span></span></div><div class="kv"><span>Básico — hasta 25 contratos</span><b>$65M/año</b></div><div class="kv"><span>Profesional — hasta 100</span><b>$130M/año</b></div><div class="kv"><span>Control — ilimitado</span><b>$260M/año</b></div></div>'+
    '<div class="llave-box" style="margin-top:10px"><div class="kv" style="font-weight:700;color:var(--azul)"><span>Multientidad (por entidad auditada / año)</span><span></span></div><div class="kv"><span>1 – 10 entidades</span><b>$45M c/u</b></div><div class="kv"><span>11 – 30</span><b>$35M c/u</b></div><div class="kv"><span>31 – 80</span><b>$28M c/u</b></div><div class="kv"><span>81 – 200</span><b>$22M c/u</b></div><div class="kv"><span>201 – 500 · gobernaciones, contralorías</span><b>$18M c/u</b></div><div class="kv"><span>501+ · Presidencia, ministerios, Contraloría General</span><b>$14M c/u</b></div></div>'+
